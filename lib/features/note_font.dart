@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class NoteFont {
   static double fontSizeSixteen = 16;
   static double fontSizeEighteen = 18;
@@ -5,4 +7,5 @@ class NoteFont {
   static double fontSizeTwentyFour = 24;
   static double fontSizeThirty = 30;
   static double fontSizeThirtySix = 36;
+  static FontWeight fontWeightBold = FontWeight.bold;
 }

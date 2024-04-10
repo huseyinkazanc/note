@@ -3,7 +3,7 @@ import 'package:note/features/note_colors.dart';
 
 class NoteWidgetIconButton extends StatelessWidget {
   final IconData iconButton;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   const NoteWidgetIconButton({super.key, required this.iconButton, required this.onPressed});
 
   @override
