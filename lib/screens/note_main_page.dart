@@ -1,8 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
+import 'package:note/features/note_icons.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/widgets/note_widget_gridView.dart';
 import 'package:note/widgets/note_widget_iconbutton.dart';
@@ -39,6 +38,32 @@ class _NoteMainPageState extends State<NoteMainPage> {
     });
   }
 
+  void _showListTileDetails(String message) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: double.infinity,
+          height: 200,
+          color: NoteColors.darkBgColor,
+          padding: const EdgeInsets.all(50.0),
+          child: const Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                NoteIcons.icMainShwDlg,
+              ),
+              Text(
+                'Delete ', // Replace this with your desired content
+                style: TextStyle(fontSize: 20.0),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +87,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
         child: NoteWidgetGridView(
           messages: messages,
           messageColors: messageColors,
+          onTap: _showListTileDetails,
         ),
       ),
       floatingActionButton: FloatingActionButton(
