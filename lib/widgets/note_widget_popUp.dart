@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
-import 'package:note/screens/note_main_page.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
   const NoteWidgetPopUp({super.key, required this.onSave});
