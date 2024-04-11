@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
+import 'package:note/screens/note_main_page.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
-  const NoteWidgetPopUp({super.key});
+  const NoteWidgetPopUp({super.key, required this.onSave});
+  final void Function(String) onSave;
 
   @override
-  State<NoteWidgetPopUp> createState() => _NoteWidgetPopUpState();
+  State<NoteWidgetPopUp> createState() => NoteWidgetPopUpState();
 }
 
-class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
+class NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
+  final TextEditingController _controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     void alertButton() {
-      setState(() {
-        print('Saved');
-      });
+      widget.onSave(_controller.text);
+      Navigator.of(context).pop();
+      //setState(() {});
     }
 
     return Builder(
@@ -26,7 +31,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
           height: 250,
           child: Column(
             children: [
-              _TitleMesage(),
+              TitleMesage(textTitleController: _controller),
               const ExplainMessage(),
             ],
           ),
@@ -118,16 +123,22 @@ class ExplainMessage extends StatelessWidget {
   }
 }
 
-class _TitleMesage extends StatelessWidget {
-  _TitleMesage({
+class TitleMesage extends StatefulWidget {
+  const TitleMesage({
     super.key,
+    required this.textTitleController,
   });
-  final textExplainController = TextEditingController();
+  final TextEditingController textTitleController;
 
+  @override
+  State<TitleMesage> createState() => _TitleMesageState();
+}
+
+class _TitleMesageState extends State<TitleMesage> {
   @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: textExplainController,
+      controller: widget.textTitleController,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: NoteColors.whiteColor,
           ),

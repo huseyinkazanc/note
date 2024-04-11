@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
+import 'package:note/widgets/note_widget_gridView.dart';
 import 'package:note/widgets/note_widget_iconbutton.dart';
 import 'package:note/widgets/note_widget_popUp.dart';
 
@@ -13,25 +16,27 @@ class NoteMainPage extends StatefulWidget {
 }
 
 class _NoteMainPageState extends State<NoteMainPage> {
-  List<String> noteList = ["Note 1", "Note 2", "Note 3"];
+  final List<String> messages = [];
+  final Map<String, Color> messageColors = {};
 
-  /*void _onPressed() {
-    setState(() {
-      noteList.add(const Padding(
-        padding: EdgeInsets.all(2.0),
-        child: SizedBox(
-          height: 100,
-          child: NoteWidgetPopUp(),
-        ),
-      ));
-    });
-  }*/
-
-  void _AlertDialogPressed() {
-    showDialog(
+  void _AlertDialogPressed() async {
+    final result = await showDialog<String>(
       context: context,
-      builder: (context) => const NoteWidgetPopUp(),
+      builder: (context) => NoteWidgetPopUp(
+        onSave: _saveText,
+      ),
     );
+    if (result != null) {
+      _saveText(result);
+    }
+  }
+
+  void _saveText(String text) {
+    setState(() {
+      final randomColor = NoteColors.randomColor();
+      messages.add(text);
+      messageColors[text] = randomColor;
+    });
   }
 
   @override
@@ -54,25 +59,16 @@ class _NoteMainPageState extends State<NoteMainPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8),
-        child: Center(
-          child: ListView.builder(
-            itemCount: noteList.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(noteList[index]),
-              );
-            },
-          ),
-          /* NoteWidgetGridView()*/
+        child: NoteWidgetGridView(
+          messages: messages,
+          messageColors: messageColors,
         ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: NoteColors.dark3bColor,
         foregroundColor: NoteColors.whiteColor,
+        onPressed: _AlertDialogPressed,
         child: const Icon(Icons.add),
-        onPressed: () {
-          _AlertDialogPressed();
-        },
       ),
     );
   }
