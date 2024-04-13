@@ -15,7 +15,8 @@ class NoteMainPage extends StatefulWidget {
 }
 
 class _NoteMainPageState extends State<NoteMainPage> {
-  final List<String> messages = [];
+  final List<String> messagesTitle = [];
+  final List<String> messagesExplain = [];
   final Map<String, Color> messageColors = {};
 
   void _AlertDialogPressed() async {
@@ -33,7 +34,8 @@ class _NoteMainPageState extends State<NoteMainPage> {
   void _saveText(String text) {
     setState(() {
       final randomColor = NoteColors.randomColor();
-      messages.add(text);
+      messagesTitle.add(text);
+      messagesExplain.add(text);
       messageColors[text] = randomColor;
     });
   }
@@ -44,18 +46,18 @@ class _NoteMainPageState extends State<NoteMainPage> {
       builder: (BuildContext context) {
         return Container(
           width: double.infinity,
-          height: 200,
+          height: 100,
           color: NoteColors.darkBgColor,
-          padding: const EdgeInsets.all(50.0),
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
                 NoteIcons.icMainShwDlg,
+                color: NoteColors.whiteColor,
               ),
               Text(
                 'Delete ', // Replace this with your desired content
-                style: TextStyle(fontSize: 20.0),
+                style: TextStyle(fontSize: NoteFont.fontSizeTwenty, color: NoteColors.whiteColor),
               ),
             ],
           ),
@@ -85,9 +87,11 @@ class _NoteMainPageState extends State<NoteMainPage> {
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: NoteWidgetGridView(
-          messages: messages,
+          messagesTitle: messagesTitle,
+          messagesExplain: messagesExplain,
           messageColors: messageColors,
-          onTap: _showListTileDetails,
+          onLongPress: _showListTileDetails,
+          onTap: (p0) {},
         ),
       ),
       floatingActionButton: FloatingActionButton(
