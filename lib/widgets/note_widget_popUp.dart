@@ -4,20 +4,22 @@ import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
-  const NoteWidgetPopUp({super.key, required this.onSave});
+  NoteWidgetPopUp({super.key, required this.onSave});
   final void Function(String) onSave;
+  final TextEditingController popTitleController = TextEditingController();
+  final TextEditingController popExplainController = TextEditingController();
 
   @override
   State<NoteWidgetPopUp> createState() => NoteWidgetPopUpState();
 }
 
 class NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
-  final TextEditingController _controller = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     void alertButton() {
-      widget.onSave(_controller.text);
+      widget.onSave(
+        widget.popTitleController.text,
+      );
       Navigator.of(context).pop();
       //setState(() {});
     }
@@ -29,8 +31,12 @@ class NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
           height: 250,
           child: Column(
             children: [
-              TitleMesage(textTitleController: _controller),
-              const ExplainMessage(),
+              TitleMesage(
+                textTitleController: widget.popTitleController,
+              ),
+              ExplainMessage(
+                textExplainController: widget.popExplainController,
+              ),
             ],
           ),
         ), // Put the TextField directly in the content
@@ -96,14 +102,23 @@ class AlertTextButton extends StatelessWidget {
   }
 }
 
-class ExplainMessage extends StatelessWidget {
+//Explain text
+class ExplainMessage extends StatefulWidget {
   const ExplainMessage({
     super.key,
+    required this.textExplainController,
   });
+  final TextEditingController textExplainController;
 
+  @override
+  State<ExplainMessage> createState() => _ExplainMessageState();
+}
+
+class _ExplainMessageState extends State<ExplainMessage> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      controller: widget.textExplainController,
       maxLines: 7,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: NoteColors.whiteColor,
@@ -121,6 +136,7 @@ class ExplainMessage extends StatelessWidget {
   }
 }
 
+//Title text
 class TitleMesage extends StatefulWidget {
   const TitleMesage({
     super.key,
