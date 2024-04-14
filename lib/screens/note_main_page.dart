@@ -92,7 +92,6 @@ class _NoteMainPageState extends State<NoteMainPage> {
           messages: messages,
           messageColors: messageColors,
           onLongPress: _showListTileDetails,
-          onTap: (p0) {},
         ),
       ),
       floatingActionButton: FloatingActionButton(
