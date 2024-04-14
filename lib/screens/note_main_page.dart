@@ -3,6 +3,7 @@ import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_icons.dart';
 import 'package:note/features/note_strings.dart';
+import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/widgets/note_widget_gridView.dart';
 import 'package:note/widgets/note_widget_iconbutton.dart';
 import 'package:note/widgets/note_widget_popUp.dart';
@@ -15,12 +16,14 @@ class NoteMainPage extends StatefulWidget {
 }
 
 class _NoteMainPageState extends State<NoteMainPage> {
-  final List<String> messagesTitle = [];
-  final List<String> messagesExplain = [];
+  final List<NoteGeneralContent> messages = [];
   final Map<String, Color> messageColors = {};
 
   void _AlertDialogPressed() async {
-    final result = await showDialog<String>(
+    popTitleController.clear();
+    popExplainController.clear();
+
+    final result = await showDialog<NoteGeneralContent>(
       context: context,
       builder: (context) => NoteWidgetPopUp(
         onSave: _saveText,
@@ -31,16 +34,15 @@ class _NoteMainPageState extends State<NoteMainPage> {
     }
   }
 
-  void _saveText(String text) {
+  void _saveText(NoteGeneralContent noteContent) {
     setState(() {
       final randomColor = NoteColors.randomColor();
-      messagesTitle.add(text);
-      messagesExplain.add(text);
-      messageColors[text] = randomColor;
+      messages.add(noteContent);
+      messageColors[noteContent.messageTitle] = randomColor;
     });
   }
 
-  void _showListTileDetails(String message) {
+  void _showListTileDetails(NoteGeneralContent noteContent) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -87,8 +89,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: NoteWidgetGridView(
-          messagesTitle: messagesTitle,
-          messagesExplain: messagesExplain,
+          messages: messages,
           messageColors: messageColors,
           onLongPress: _showListTileDetails,
           onTap: (p0) {},
