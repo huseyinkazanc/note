@@ -2,68 +2,72 @@ import 'package:flutter/material.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
+import 'package:note/notecontent/note_general_content.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
-  NoteWidgetPopUp({super.key, required this.onSave});
-  final void Function(String) onSave;
-  final TextEditingController popTitleController = TextEditingController();
-  final TextEditingController popExplainController = TextEditingController();
+  const NoteWidgetPopUp({super.key, required this.onSave}); // Added Key? key parameter
+
+  final void Function(NoteGeneralContent) onSave;
 
   @override
-  State<NoteWidgetPopUp> createState() => NoteWidgetPopUpState();
+  State<NoteWidgetPopUp> createState() => _NoteWidgetPopUpState();
 }
 
-class NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
+final TextEditingController popTitleController = TextEditingController(); // Removed 'late' keyword
+final TextEditingController popExplainController = TextEditingController(); // Removed 'late' keyword
+
+class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
+  // Removed initState and dispose methods since controllers are initialized directly
+
+  void alertButton() {
+    final noteContent = NoteGeneralContent(
+      messageTitle: popTitleController.text,
+      messageContent: popExplainController.text,
+    );
+    widget.onSave(noteContent);
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
-    void alertButton() {
-      widget.onSave(
-        widget.popTitleController.text,
-      );
-      Navigator.of(context).pop();
-      //setState(() {});
-    }
-
-    return Builder(
-      builder: (context) => AlertDialog(
-        backgroundColor: NoteColors.darkBgColor,
-        content: SizedBox(
-          height: 250,
-          child: Column(
-            children: [
-              TitleMesage(
-                textTitleController: widget.popTitleController,
-              ),
-              ExplainMessage(
-                textExplainController: widget.popExplainController,
-              ),
-            ],
-          ),
-        ), // Put the TextField directly in the content
-        actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              AlertTextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                AlertBgColor: NoteColors.redColor,
-                AlertTxtColor: NoteColors.whiteColor,
-                AlertText: NoteStrings.appAlrtBtnDcTxt,
-              ),
-              AlertTextButton(
-                onPressed: () {
-                  alertButton();
-                },
-                AlertBgColor: NoteColors.greenColor,
-                AlertTxtColor: NoteColors.whiteColor,
-                AlertText: NoteStrings.appAlrtBtnSvTxt,
-              ),
-            ],
-          ),
-        ],
+    return AlertDialog(
+      backgroundColor: NoteColors.darkBgColor,
+      content: SizedBox(
+        height: 250,
+        child: Column(
+          children: [
+            TitleMessage(
+              textTitleController: popTitleController,
+            ),
+            ExplainMessage(
+              textExplainController: popExplainController,
+            ),
+          ],
+        ),
       ),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            AlertTextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              alertBgColor: NoteColors.redColor,
+              alertTxtColor: NoteColors.whiteColor,
+              alertText: NoteStrings.appAlrtBtnDcTxt,
+            ),
+            AlertTextButton(
+              onPressed: () {
+                alertButton();
+              },
+              alertBgColor: NoteColors.greenColor,
+              alertTxtColor: NoteColors.whiteColor,
+              alertText: NoteStrings.appAlrtBtnSvTxt,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -72,13 +76,14 @@ class AlertTextButton extends StatelessWidget {
   const AlertTextButton({
     super.key,
     required this.onPressed,
-    required this.AlertBgColor,
-    required this.AlertTxtColor,
-    required this.AlertText,
+    required this.alertBgColor,
+    required this.alertTxtColor,
+    required this.alertText,
   });
-  final String AlertText;
-  final Color AlertBgColor;
-  final Color AlertTxtColor;
+
+  final String alertText;
+  final Color alertBgColor;
+  final Color alertTxtColor;
   final VoidCallback onPressed;
 
   @override
@@ -93,21 +98,21 @@ class AlertTextButton extends StatelessWidget {
         fixedSize: MaterialStateProperty.all(
           const Size(80, 40),
         ),
-        backgroundColor: MaterialStateProperty.all(AlertBgColor),
-        foregroundColor: MaterialStateProperty.all(AlertTxtColor),
+        backgroundColor: MaterialStateProperty.all(alertBgColor),
+        foregroundColor: MaterialStateProperty.all(alertTxtColor),
       ),
       onPressed: onPressed,
-      child: Text(AlertText),
+      child: Text(alertText),
     );
   }
 }
 
-//Explain text
 class ExplainMessage extends StatefulWidget {
   const ExplainMessage({
     super.key,
     required this.textExplainController,
   });
+
   final TextEditingController textExplainController;
 
   @override
@@ -136,19 +141,19 @@ class _ExplainMessageState extends State<ExplainMessage> {
   }
 }
 
-//Title text
-class TitleMesage extends StatefulWidget {
-  const TitleMesage({
+class TitleMessage extends StatefulWidget {
+  const TitleMessage({
     super.key,
     required this.textTitleController,
   });
+
   final TextEditingController textTitleController;
 
   @override
-  State<TitleMesage> createState() => _TitleMesageState();
+  State<TitleMessage> createState() => _TitleMessageState();
 }
 
-class _TitleMesageState extends State<TitleMesage> {
+class _TitleMessageState extends State<TitleMessage> {
   @override
   Widget build(BuildContext context) {
     return TextField(
@@ -158,9 +163,10 @@ class _TitleMesageState extends State<TitleMesage> {
           ),
       decoration: InputDecoration(
         focusedBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-          color: NoteColors.whiteColor,
-        )),
+          borderSide: BorderSide(
+            color: NoteColors.whiteColor,
+          ),
+        ),
         hintText: NoteStrings.appAlrtDlgTitlHnt,
         hintStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: NoteColors.whiteColor,
