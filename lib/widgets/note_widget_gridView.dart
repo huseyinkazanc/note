@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_icons.dart';
 import 'package:note/notecontent/note_general_content.dart';
+import 'package:note/widgets/note_widget_popUp.dart';
 
 class NoteWidgetGridView extends StatefulWidget {
   const NoteWidgetGridView({
@@ -8,13 +10,11 @@ class NoteWidgetGridView extends StatefulWidget {
     required this.messages,
     required this.messageColors,
     this.onLongPress,
-    this.onTap,
   });
 
   final List<NoteGeneralContent> messages;
   final Map<String, Color> messageColors;
   final Function(NoteGeneralContent)? onLongPress;
-  final Function(NoteGeneralContent)? onTap;
 
   @override
   State<NoteWidgetGridView> createState() => _NoteWidgetGridViewState();
@@ -23,10 +23,70 @@ class NoteWidgetGridView extends StatefulWidget {
 class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
   final Map<String, bool> _isCheckedMap = {};
 
-  // Below method is to get the text color based on the background color
   Color getTextColor(Color backgroundColor) {
     final luminance = backgroundColor.computeLuminance();
     return luminance > 0.5 ? Colors.black : Colors.white;
+  }
+
+  void _AlertDialogEdit(NoteGeneralContent noteContent) {
+    final TextEditingController titleController = TextEditingController(text: noteContent.messageTitle);
+    final TextEditingController contentController = TextEditingController(text: noteContent.messageContent);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: NoteColors.darkBgColor,
+          title: Text(
+            'Edit Message',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: NoteColors.whiteColor,
+                ),
+          ),
+          content: SizedBox(
+            height: 250,
+            child: Column(
+              children: [
+                TitleMessage(
+                  textTitleController: titleController,
+                ),
+                ExplainMessage(
+                  textExplainController: contentController,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final editedNoteContent = NoteGeneralContent(
+                  messageTitle: titleController.text,
+                  messageContent: contentController.text,
+                );
+                _onSave(editedNoteContent); // Call the _onSave method
+                Navigator.of(context).pop();
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onSave(NoteGeneralContent editedContent) {
+    setState(() {
+      final index = widget.messages.indexWhere((element) => element.messageTitle == editedContent.messageTitle);
+      if (index != -1) {
+        widget.messages[index] = editedContent;
+      }
+    });
   }
 
   @override
@@ -40,12 +100,9 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
             children: [
               // Below is the header of the grid view
               ...widget.messages.map((noteContent) {
-                // Below is to get the color of the message based on the title
                 final color = widget.messageColors[noteContent.messageTitle]!;
-                // Below is to get the text color based on the background color
                 final textColor = getTextColor(color);
                 return GestureDetector(
-                  // Below onLongPress is to get the long press event
                   onLongPress: () {
                     if (widget.onLongPress != null) {
                       widget.onLongPress!(noteContent);
@@ -81,9 +138,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
                       ),
                       trailing: GestureDetector(
                         onTap: () {
-                          if (widget.onTap != null) {
-                            widget.onTap!(noteContent);
-                          }
+                          _AlertDialogEdit(noteContent);
                         },
                         child: Icon(
                           NoteIcons.icLstGrdPage_trailing,
