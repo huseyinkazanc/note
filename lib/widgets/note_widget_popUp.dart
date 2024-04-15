@@ -5,7 +5,7 @@ import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
-  const NoteWidgetPopUp({super.key, required this.onSave}); // Added Key? key parameter
+  const NoteWidgetPopUp({super.key, required this.onSave});
 
   final void Function(NoteGeneralContent) onSave;
 
@@ -13,12 +13,10 @@ class NoteWidgetPopUp extends StatefulWidget {
   State<NoteWidgetPopUp> createState() => _NoteWidgetPopUpState();
 }
 
-final TextEditingController popTitleController = TextEditingController(); // Removed 'late' keyword
-final TextEditingController popExplainController = TextEditingController(); // Removed 'late' keyword
+final TextEditingController popTitleController = TextEditingController();
+final TextEditingController popExplainController = TextEditingController();
 
 class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
-  // Removed initState and dispose methods since controllers are initialized directly
-
   void alertButton() {
     final noteContent = NoteGeneralContent(
       messageTitle: popTitleController.text,
