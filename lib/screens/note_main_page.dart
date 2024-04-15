@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
-import 'package:note/features/note_icons.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
-import 'package:note/widgets/note_widget_gridView.dart';
-import 'package:note/widgets/note_widget_iconbutton.dart';
-import 'package:note/widgets/note_widget_popUp.dart';
+import 'package:note/widgets/main/note_widget_floataction.dart';
+import 'package:note/widgets/notelist/note_widget_list.dart';
+import 'package:note/widgets/common/note_widget_iconbutton.dart';
+import 'package:note/widgets/popup/note_widget_popUp.dart';
+import 'package:note/widgets/main/note_widget_showModelBottomSheet.dart';
 
 class NoteMainPage extends StatefulWidget {
   const NoteMainPage({super.key});
@@ -46,23 +47,16 @@ class _NoteMainPageState extends State<NoteMainPage> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Container(
-          width: double.infinity,
-          height: 100,
-          color: NoteColors.darkBgColor,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                NoteIcons.icMainShwDlg,
-                color: NoteColors.whiteColor,
-              ),
-              Text(
-                'Delete ', // Replace this with your desired content
-                style: TextStyle(fontSize: NoteFont.fontSizeTwenty, color: NoteColors.whiteColor),
-              ),
-            ],
-          ),
+        return NoteShowModelDetails(
+          onDelete: () {
+            setState(() {
+              // Remove the noteContent from the messages list
+              messages.remove(noteContent);
+              // Remove the color associated with the noteContent's title from the messageColors map
+              messageColors.remove(noteContent.messageTitle);
+            });
+            Navigator.pop(context); // Close the bottom sheet
+          },
         );
       },
     );
@@ -94,11 +88,8 @@ class _NoteMainPageState extends State<NoteMainPage> {
           onLongPress: _showListTileDetails,
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: NoteColors.dark3bColor,
-        foregroundColor: NoteColors.whiteColor,
+      floatingActionButton: NoteWidgetFloatingAction(
         onPressed: _AlertDialogPressed,
-        child: const Icon(Icons.add),
       ),
     );
   }
