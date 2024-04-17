@@ -4,14 +4,14 @@ import 'package:note/features/note_font.dart';
 import 'package:note/features/note_icons.dart';
 
 class NoteShowModelDetails extends StatelessWidget {
-  final VoidCallback onDelete;
+  final VoidCallback onPressed;
 
-  const NoteShowModelDetails({super.key, required this.onDelete});
+  const NoteShowModelDetails({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onDelete,
+      onTap: onPressed,
       child: Container(
         width: double.infinity,
         height: 100,
