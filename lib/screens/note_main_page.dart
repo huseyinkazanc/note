@@ -4,22 +4,21 @@ import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
+import 'package:note/widgets/main/note_widget_show_before_delete.dart';
 import 'package:note/widgets/notelist/note_widget_list.dart';
 import 'package:note/widgets/common/note_widget_iconbutton.dart';
 import 'package:note/widgets/popup/note_widget_popUp.dart';
 import 'package:note/widgets/main/note_widget_showModelBottomSheet.dart';
 
 class NoteMainPage extends StatefulWidget {
-  const NoteMainPage({super.key});
-
+  NoteMainPage({super.key});
+  final List<NoteGeneralContent> messages = [];
+  final Map<String, Color> messageColors = {};
   @override
   State<NoteMainPage> createState() => _NoteMainPageState();
 }
 
 class _NoteMainPageState extends State<NoteMainPage> {
-  final List<NoteGeneralContent> messages = [];
-  final Map<String, Color> messageColors = {};
-
   void _AlertDialogPressed() async {
     popTitleController.clear();
     popExplainController.clear();
@@ -38,8 +37,8 @@ class _NoteMainPageState extends State<NoteMainPage> {
   void _saveText(NoteGeneralContent noteContent) {
     setState(() {
       final randomColor = NoteColors.randomColor();
-      messages.add(noteContent);
-      messageColors[noteContent.messageTitle] = randomColor;
+      widget.messages.add(noteContent);
+      widget.messageColors[noteContent.messageTitle] = randomColor;
     });
   }
 
@@ -48,14 +47,24 @@ class _NoteMainPageState extends State<NoteMainPage> {
       context: context,
       builder: (BuildContext context) {
         return NoteShowModelDetails(
-          onDelete: () {
-            setState(() {
-              // Remove the noteContent from the messages list
-              messages.remove(noteContent);
-              // Remove the color associated with the noteContent's title from the messageColors map
-              messageColors.remove(noteContent.messageTitle);
-            });
-            Navigator.pop(context); // Close the bottom sheet
+          onPressed: () {
+            Navigator.pop(context); // Close the details modal
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return NoteWidgetBeforeDelete(
+                  onDelete: () {
+                    setState(() {
+                      widget.messages.remove(noteContent);
+                      // widget.messageColors.remove(noteContent.messageTitle);
+                      Navigator.pop(context);
+                    });
+                  },
+                );
+                // Show the delete confirmation dialog
+              },
+            );
+            // Navigator.pop(context); // Close the bottom sheet
           },
         );
       },
@@ -83,8 +92,8 @@ class _NoteMainPageState extends State<NoteMainPage> {
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: NoteWidgetGridView(
-          messages: messages,
-          messageColors: messageColors,
+          messages: widget.messages,
+          messageColors: widget.messageColors,
           onLongPress: _showListTileDetails,
         ),
       ),
