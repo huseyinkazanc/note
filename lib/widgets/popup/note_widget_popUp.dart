@@ -63,7 +63,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
               },
               alertBgColor: NoteColors.greenColor,
               alertTxtColor: NoteColors.whiteColor,
-              alertText: NoteStrings.appAlrtBtnDcTxt,
+              alertText: NoteStrings.appAlrtBtnSvTxt,
             ),
           ],
         ),
