@@ -19,6 +19,8 @@ class NoteMainPage extends StatefulWidget {
 }
 
 class _NoteMainPageState extends State<NoteMainPage> {
+  TextEditingController searchController = TextEditingController();
+
   void _AlertDialogPressed() async {
     popTitleController.clear();
     popExplainController.clear();
@@ -71,20 +73,67 @@ class _NoteMainPageState extends State<NoteMainPage> {
     );
   }
 
+  bool isSearchExpanded = false;
+
+  void toggleSearchBar() {
+    setState(() {
+      isSearchExpanded = !isSearchExpanded;
+      if (!isSearchExpanded) {
+        searchController.clear();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: NoteColors.darkBgColor,
       appBar: AppBar(
-        title: Text(
-          NoteStrings.appTitle,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: NoteColors.whiteColor,
-                fontSize: NoteFont.fontSizeThirtySix,
+        title: isSearchExpanded
+            ? AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        autofocus: true,
+                        decoration: const InputDecoration(
+                          hintText: 'Search...',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.only(left: 15),
+                        ),
+                        onSubmitted: (value) {
+                          toggleSearchBar(); // Collapse the search bar after search
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        searchController.clear(); // Clear the text in the search bar
+                      },
+                    )
+                  ],
+                ),
+              )
+            : Text(
+                NoteStrings.appTitle,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: NoteColors.whiteColor,
+                      fontSize: NoteFont.fontSizeThirtySix,
+                    ),
               ),
-        ),
         actions: [
-          NoteWidgetIconButton(iconButton: Icons.search, onPressed: () {}),
+          NoteWidgetIconButton(
+            iconButton: Icons.search,
+            onPressed: () {
+              setState(() {
+                toggleSearchBar();
+              });
+            },
+          ),
           NoteWidgetIconButton(iconButton: Icons.info, onPressed: () {}),
         ],
         backgroundColor: NoteColors.darkBgColor,
