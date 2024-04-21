@@ -20,6 +20,7 @@ class NoteMainPage extends StatefulWidget {
 
 class _NoteMainPageState extends State<NoteMainPage> {
   TextEditingController searchController = TextEditingController();
+  List<NoteGeneralContent> filteredMessages = [];
 
   void _AlertDialogPressed() async {
     popTitleController.clear();
@@ -41,6 +42,8 @@ class _NoteMainPageState extends State<NoteMainPage> {
       final randomColor = NoteColors.randomColor();
       widget.messages.add(noteContent);
       widget.messageColors[noteContent.messageTitle] = randomColor;
+      // Update filtered messages based on search query
+      _filterMessages(searchController.text);
     });
   }
 
@@ -58,27 +61,41 @@ class _NoteMainPageState extends State<NoteMainPage> {
                   onDelete: () {
                     setState(() {
                       widget.messages.remove(noteContent);
-                      // widget.messageColors.remove(noteContent.messageTitle);
+                      // Update filtered messages based on search query
+                      _filterMessages(searchController.text);
                       Navigator.pop(context);
                     });
                   },
                 );
-                // Show the delete confirmation dialog
               },
             );
-            // Navigator.pop(context); // Close the bottom sheet
           },
         );
       },
     );
   }
 
+  void _filterMessages(String query) {
+    if (query.isEmpty) {
+      // If query is empty, display all messages
+      setState(() {
+        filteredMessages = List.from(widget.messages);
+      });
+    } else {
+      // Filter messages based on search query
+      setState(() {
+        filteredMessages = widget.messages
+            .where((message) => message.messageTitle.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      });
+    }
+  }
+
   bool isSearchExpanded = false;
 
   void toggleSearchBar() {
     setState(() {
-      isSearchExpanded = !isSearchExpanded;
-      if (!isSearchExpanded) {
+      if (searchController.text.isNotEmpty) {
         searchController.clear();
       }
     });
@@ -86,68 +103,98 @@ class _NoteMainPageState extends State<NoteMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: NoteColors.darkBgColor,
-      appBar: AppBar(
-        title: isSearchExpanded
-            ? AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: MediaQuery.of(context).size.width,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: searchController,
-                        autofocus: true,
-                        decoration: const InputDecoration(
-                          hintText: 'Search...',
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.only(left: 15),
+    return GestureDetector(
+      onTap: () {
+        // Collapse search bar when tapping anywhere on the page
+        if (isSearchExpanded) {
+          setState(() {
+            isSearchExpanded = false;
+            searchController.clear();
+            _filterMessages('');
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: NoteColors.darkBgColor,
+        appBar: AppBar(
+          title: isSearchExpanded
+              ? AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: MediaQuery.of(context).size.width,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: TextStyle(color: NoteColors.whiteColor),
+                          controller: searchController,
+                          autofocus: true,
+                          decoration: InputDecoration(
+                            hintStyle: TextStyle(color: NoteColors.whiteColor),
+                            hintText: 'Search...',
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.only(left: 15),
+                          ),
+                          onSubmitted: (value) {
+                            toggleSearchBar(); // Collapse the search bar after search
+                          },
+                          onChanged: (value) {
+                            _filterMessages(value); // Filter messages as user types
+                          },
                         ),
-                        onSubmitted: (value) {
-                          toggleSearchBar(); // Collapse the search bar after search
-                        },
+                      ),
+                    ],
+                  ),
+                )
+              : Text(
+                  NoteStrings.appTitle,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: NoteColors.whiteColor,
+                        fontSize: NoteFont.fontSizeThirtySix,
+                      ),
+                ),
+          actions: isSearchExpanded
+              ? [
+                  IconButton(
+                    icon: const Icon(Icons.clear),
+                    style: TextButton.styleFrom(
+                      iconColor: NoteColors.whiteColor,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        searchController.clear(); // Clear the text in the search bar
-                      },
-                    )
-                  ],
-                ),
-              )
-            : Text(
-                NoteStrings.appTitle,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: NoteColors.whiteColor,
-                      fontSize: NoteFont.fontSizeThirtySix,
-                    ),
-              ),
-        actions: [
-          NoteWidgetIconButton(
-            iconButton: Icons.search,
-            onPressed: () {
-              setState(() {
-                toggleSearchBar();
-              });
-            },
-          ),
-          NoteWidgetIconButton(iconButton: Icons.info, onPressed: () {}),
-        ],
-        backgroundColor: NoteColors.darkBgColor,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8),
-        child: NoteWidgetGridView(
-          messages: widget.messages,
-          messageColors: widget.messageColors,
-          onLongPress: _showListTileDetails,
+                    onPressed: () {
+                      setState(() {
+                        isSearchExpanded = false;
+                        searchController.clear();
+                        _filterMessages('');
+                      });
+                    },
+                  ),
+                ]
+              : [
+                  NoteWidgetIconButton(
+                    iconButton: Icons.search,
+                    onPressed: () {
+                      setState(() {
+                        isSearchExpanded = true; // Open search field
+                      });
+                    },
+                  ),
+                  NoteWidgetIconButton(iconButton: Icons.info, onPressed: () {}),
+                ],
+          backgroundColor: NoteColors.darkBgColor,
         ),
-      ),
-      floatingActionButton: NoteWidgetFloatingAction(
-        onPressed: _AlertDialogPressed,
+        body: Padding(
+          padding: const EdgeInsets.all(8),
+          child: NoteWidgetGridView(
+            messages: filteredMessages, // Display filtered messages
+            messageColors: widget.messageColors,
+            onLongPress: _showListTileDetails,
+          ),
+        ),
+        floatingActionButton: NoteWidgetFloatingAction(
+          onPressed: _AlertDialogPressed,
+        ),
       ),
     );
   }
