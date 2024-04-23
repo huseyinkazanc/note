@@ -6,7 +6,7 @@ import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
 import 'package:note/widgets/main/note_widget_show_before_delete.dart';
 import 'package:note/widgets/notelist/note_widget_list.dart';
-import 'package:note/widgets/common/note_widget_iconbutton.dart';
+import 'package:note/widgets/common/note_widget_custom_iconbutton.dart';
 import 'package:note/widgets/popup/note_widget_popUp.dart';
 import 'package:note/widgets/main/note_widget_showModelBottomSheet.dart';
 
@@ -172,7 +172,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
                   ),
                 ]
               : [
-                  NoteWidgetIconButton(
+                  NoteWidgetCustomIconButton(
                     iconButton: Icons.search,
                     onPressed: () {
                       setState(() {
@@ -180,7 +180,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
                       });
                     },
                   ),
-                  NoteWidgetIconButton(iconButton: Icons.info, onPressed: () {}),
+                  NoteWidgetCustomIconButton(iconButton: Icons.info, onPressed: () {}),
                 ],
           backgroundColor: NoteColors.darkBgColor,
         ),

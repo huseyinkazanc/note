@@ -20,7 +20,7 @@ class _ExplainMessageState extends State<NoteWidgetExplainMessage> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.textExplainController,
-      maxLines: 7,
+      maxLines: 5,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: NoteColors.whiteColor,
             fontSize: NoteFont.fontSizeEighteen,
