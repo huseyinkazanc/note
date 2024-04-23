@@ -25,7 +25,7 @@ class NoteWidgetListTile extends StatelessWidget {
     return ListTile(
       tileColor: color,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(40.0),
+        borderRadius: BorderRadius.circular(25.0),
       ),
       title: Text(
         noteContent.messageTitle,

@@ -62,7 +62,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
             children: [
               // Below is the header of the grid view
               ...widget.messages.map((noteContent) {
-                final color = widget.messageColors[noteContent.messageTitle] ?? Colors.grey;
+                final color = widget.messageColors[noteContent.messageTitle] ?? Colors.white;
                 final textColor = getTextColor(color);
                 return GestureDetector(
                   onLongPress: () {
@@ -73,7 +73,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
                   child: Card(
                     shape: RoundedRectangleBorder(
                       side: const BorderSide(),
-                      borderRadius: BorderRadius.circular(40.0),
+                      borderRadius: BorderRadius.circular(25.0),
                     ),
                     child: NoteWidgetListTile(
                       noteContent: noteContent,
