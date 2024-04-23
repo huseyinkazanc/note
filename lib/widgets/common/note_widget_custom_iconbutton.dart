@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:note/features/note_colors.dart';
 
-class NoteWidgetIconButton extends StatelessWidget {
+class NoteWidgetCustomIconButton extends StatelessWidget {
   final IconData iconButton;
   final VoidCallback? onPressed;
-  const NoteWidgetIconButton({super.key, required this.iconButton, required this.onPressed});
+  const NoteWidgetCustomIconButton({super.key, required this.iconButton, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {

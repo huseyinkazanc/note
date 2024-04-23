@@ -4,6 +4,7 @@ import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/widgets/popup/note_widget_alerttext_buton.dart';
 import 'package:note/widgets/popup/note_widget_explain_message.dart';
+import 'package:note/widgets/popup/note_widget_icon_color.dart';
 import 'package:note/widgets/popup/note_widget_title_message.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
@@ -19,6 +20,29 @@ final TextEditingController popTitleController = TextEditingController();
 final TextEditingController popExplainController = TextEditingController();
 
 class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
+  late List<Widget> scaledIcons;
+
+  final List<Color> rainbowColors = [
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.indigo,
+    Colors.purple,
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    scaledIcons = List.generate(rainbowColors.length, (index) {
+      return NoteWidgetIconColor(
+        iconButton: Icons.circle,
+        iconColor: rainbowColors[index],
+      );
+    });
+  }
+
   void alertButton() {
     final noteContent = NoteGeneralContent(
       messageTitle: popTitleController.text,
@@ -41,6 +65,12 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
             ),
             NoteWidgetExplainMessage(
               textExplainController: popExplainController,
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: scaledIcons,
+              ),
             ),
           ],
         ),
