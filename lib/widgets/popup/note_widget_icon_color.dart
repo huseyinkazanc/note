@@ -9,6 +9,7 @@ class NoteWidgetIconColor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
+      iconSize: 20,
       icon: Icon(
         iconButton,
         color: iconColor,

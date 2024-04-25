@@ -21,7 +21,7 @@ final TextEditingController popExplainController = TextEditingController();
 
 class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
   late List<Widget> scaledIcons;
-
+  Color? backgroundColor;
   final List<Color> rainbowColors = [
     Colors.red,
     Colors.orange,
@@ -36,9 +36,17 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
   void initState() {
     super.initState();
     scaledIcons = List.generate(rainbowColors.length, (index) {
-      return NoteWidgetIconColor(
-        iconButton: Icons.circle,
-        iconColor: rainbowColors[index],
+      return ConstrainedBox(
+        constraints: BoxConstraints.tight(const Size(30, 30)),
+        child: NoteWidgetIconColor(
+          iconButton: Icons.circle,
+          iconColor: rainbowColors[index],
+          onPressed: () {
+            setState(() {
+              backgroundColor = rainbowColors[index];
+            });
+          },
+        ),
       );
     });
   }
@@ -55,7 +63,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: NoteColors.darkBgColor,
+      backgroundColor: backgroundColor ?? NoteColors.darkBgColor,
       content: SizedBox(
         height: 250,
         child: Column(
@@ -66,11 +74,9 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
             NoteWidgetExplainMessage(
               textExplainController: popExplainController,
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: scaledIcons,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: scaledIcons,
             ),
           ],
         ),
