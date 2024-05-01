@@ -8,9 +8,12 @@ import 'package:note/widgets/popup/note_widget_icon_color.dart';
 import 'package:note/widgets/popup/note_widget_title_message.dart';
 
 class NoteWidgetPopUp extends StatefulWidget {
-  const NoteWidgetPopUp({super.key, required this.onSave});
+  const NoteWidgetPopUp({
+    super.key,
+    required this.onSave,
+  });
 
-  final void Function(NoteGeneralContent) onSave;
+  final void Function(NoteGeneralContent, Color) onSave;
 
   @override
   State<NoteWidgetPopUp> createState() => _NoteWidgetPopUpState();
@@ -22,28 +25,18 @@ final TextEditingController popExplainController = TextEditingController();
 class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
   late List<Widget> scaledIcons;
   Color? backgroundColor;
-  final List<Color> rainbowColors = [
-    Colors.red,
-    Colors.orange,
-    Colors.yellow,
-    Colors.green,
-    Colors.blue,
-    Colors.indigo,
-    Colors.purple,
-  ];
-
   @override
   void initState() {
     super.initState();
-    scaledIcons = List.generate(rainbowColors.length, (index) {
+    scaledIcons = List.generate(NoteColors.rainbowColors.length, (index) {
       return ConstrainedBox(
         constraints: BoxConstraints.tight(const Size(30, 30)),
         child: NoteWidgetIconColor(
           iconButton: Icons.circle,
-          iconColor: rainbowColors[index],
+          iconColor: NoteColors.rainbowColors[index],
           onPressed: () {
             setState(() {
-              backgroundColor = rainbowColors[index];
+              backgroundColor = NoteColors.rainbowColors[index];
             });
           },
         ),
@@ -56,14 +49,14 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
       messageTitle: popTitleController.text,
       messageContent: popExplainController.text,
     );
-    widget.onSave(noteContent);
+    widget.onSave(noteContent, backgroundColor!);
     Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: backgroundColor ?? NoteColors.darkBgColor,
+      backgroundColor: NoteColors.darkBgColor,
       content: SizedBox(
         height: 250,
         child: Column(

@@ -1,6 +1,11 @@
 class NoteGeneralContent {
-  final String messageTitle;
-  final String messageContent;
+  final int? id;
+  String messageTitle;
+  String messageContent;
 
-  NoteGeneralContent({required this.messageTitle, required this.messageContent});
+  NoteGeneralContent({
+    this.id,
+    required this.messageTitle,
+    required this.messageContent,
+  });
 }

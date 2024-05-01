@@ -22,7 +22,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
   TextEditingController searchController = TextEditingController();
   List<NoteGeneralContent> filteredMessages = [];
 
-  void _AlertDialogPressed() async {
+  void _alertDialogPressed() async {
     popTitleController.clear();
     popExplainController.clear();
 
@@ -37,17 +37,19 @@ class _NoteMainPageState extends State<NoteMainPage> {
     }
   }
 
-  void _saveText(NoteGeneralContent noteContent) {
+  void _saveText(NoteGeneralContent noteContent, [Color? backgroundColor]) {
     setState(() {
-      final randomColor = NoteColors.randomColor();
+      //final randomColor = NoteColors.rainbowColors[widget.messages.length % NoteColors.rainbowColors.length];
       widget.messages.add(noteContent);
-      widget.messageColors[noteContent.messageTitle] = randomColor;
+      widget.messageColors[noteContent.messageTitle] = backgroundColor!;
       // Update filtered messages based on search query
       _filterMessages(searchController.text);
     });
   }
 
   void _showListTileDetails(NoteGeneralContent noteContent) {
+    print('Deleting note: $noteContent');
+
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
@@ -60,9 +62,18 @@ class _NoteMainPageState extends State<NoteMainPage> {
                 return NoteWidgetBeforeDelete(
                   onDelete: () {
                     setState(() {
-                      widget.messages.remove(noteContent);
-                      // Update filtered messages based on search query
-                      _filterMessages(searchController.text);
+                      // Find the index of the note to be deleted
+                      int indexToDelete = widget.messages.indexOf(noteContent);
+                      if (indexToDelete != -1) {
+                        // Remove the note at the found index
+                        widget.messages.removeAt(indexToDelete);
+
+                        // Remove the message's color from the map
+                        widget.messageColors.remove(noteContent.messageTitle);
+
+                        // Update filtered messages based on search query
+                        _filterMessages(searchController.text);
+                      }
                       Navigator.pop(context);
                     });
                   },
@@ -73,8 +84,11 @@ class _NoteMainPageState extends State<NoteMainPage> {
         );
       },
     );
+
+    print('After deleting note: $noteContent');
   }
 
+  // Filter messages based on search query
   void _filterMessages(String query) {
     if (query.isEmpty) {
       // If query is empty, display all messages
@@ -89,10 +103,12 @@ class _NoteMainPageState extends State<NoteMainPage> {
             .toList();
       });
     }
+
+    print('Filtered Messages: $filteredMessages');
   }
 
   bool isSearchExpanded = false;
-
+  // Toggle search bar
   void toggleSearchBar() {
     setState(() {
       if (searchController.text.isNotEmpty) {
@@ -193,7 +209,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
           ),
         ),
         floatingActionButton: NoteWidgetFloatingAction(
-          onPressed: _AlertDialogPressed,
+          onPressed: _alertDialogPressed,
         ),
       ),
     );
