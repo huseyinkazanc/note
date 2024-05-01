@@ -13,7 +13,7 @@ import 'package:note/widgets/main/note_widget_showModelBottomSheet.dart';
 class NoteMainPage extends StatefulWidget {
   NoteMainPage({super.key});
   final List<NoteGeneralContent> messages = [];
-  final Map<String, Color> messageColors = {};
+  final Map<int, Color> messageColors = {};
   @override
   State<NoteMainPage> createState() => _NoteMainPageState();
 }
@@ -21,6 +21,7 @@ class NoteMainPage extends StatefulWidget {
 class _NoteMainPageState extends State<NoteMainPage> {
   TextEditingController searchController = TextEditingController();
   List<NoteGeneralContent> filteredMessages = [];
+  int _listId = 0;
 
   void _alertDialogPressed() async {
     popTitleController.clear();
@@ -29,6 +30,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
     final result = await showDialog<NoteGeneralContent>(
       context: context,
       builder: (context) => NoteWidgetPopUp(
+        id: _listId,
         onSave: _saveText,
       ),
     );
@@ -40,16 +42,20 @@ class _NoteMainPageState extends State<NoteMainPage> {
   void _saveText(NoteGeneralContent noteContent, [Color? backgroundColor]) {
     setState(() {
       //final randomColor = NoteColors.rainbowColors[widget.messages.length % NoteColors.rainbowColors.length];
-      widget.messages.add(noteContent);
-      widget.messageColors[noteContent.messageTitle] = backgroundColor!;
+      final id = _listId++;
+      final noteWithId = NoteGeneralContent(
+        id: id,
+        messageTitle: noteContent.messageTitle,
+        messageContent: noteContent.messageContent,
+      );
+      widget.messages.add(noteWithId);
+      widget.messageColors[noteContent.id] = backgroundColor!;
       // Update filtered messages based on search query
       _filterMessages(searchController.text);
     });
   }
 
   void _showListTileDetails(NoteGeneralContent noteContent) {
-    print('Deleting note: $noteContent');
-
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {

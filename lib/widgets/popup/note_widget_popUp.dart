@@ -11,9 +11,11 @@ class NoteWidgetPopUp extends StatefulWidget {
   const NoteWidgetPopUp({
     super.key,
     required this.onSave,
+    required this.id,
   });
 
   final void Function(NoteGeneralContent, Color) onSave;
+  final int id;
 
   @override
   State<NoteWidgetPopUp> createState() => _NoteWidgetPopUpState();
@@ -46,9 +48,11 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
 
   void alertButton() {
     final noteContent = NoteGeneralContent(
+      id: widget.id,
       messageTitle: popTitleController.text,
       messageContent: popExplainController.text,
     );
+    print('Pop id: ${widget.id}');
     widget.onSave(noteContent, backgroundColor!);
     Navigator.of(context).pop();
   }
