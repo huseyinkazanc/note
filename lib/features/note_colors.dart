@@ -11,4 +11,14 @@ class NoteColors {
   static Color randomColor() {
     return Colors.primaries[Random().nextInt(Colors.primaries.length)];
   }
+
+  static List<Color> rainbowColors = [
+    Colors.red,
+    Colors.orange,
+    Colors.yellow,
+    Colors.green,
+    Colors.blue,
+    Colors.indigo,
+    Colors.purple,
+  ];
 }
