@@ -6,13 +6,13 @@ class NoteWidgetListEdit extends StatelessWidget {
   const NoteWidgetListEdit({super.key, required this.noteContent});
 
   // For editing the note it is working with the NoteGeneralContent class
-  final NoteGeneralContent? noteContent;
+  final NoteGeneralContent noteContent;
 
   @override
   Widget build(BuildContext context) {
     // Creating text controllers for the title and content
-    TextEditingController titleController = TextEditingController(text: noteContent!.messageTitle);
-    TextEditingController contentController = TextEditingController(text: noteContent!.messageContent);
+    TextEditingController titleController = TextEditingController(text: noteContent.messageTitle);
+    TextEditingController contentController = TextEditingController(text: noteContent.messageContent);
 
     return AlertDialog(
       backgroundColor: NoteColors.darkBgColor,
@@ -56,9 +56,11 @@ class NoteWidgetListEdit extends StatelessWidget {
           onPressed: () {
             // Saving the changes
             NoteGeneralContent editedContent = NoteGeneralContent(
+              id: noteContent.id,
               messageTitle: titleController.text,
               messageContent: contentController.text,
             );
+            print('Befor Save id: ${noteContent.id}');
             Navigator.of(context).pop(editedContent); // Passing edited content back to the caller
           },
           child: const Text('Save'),

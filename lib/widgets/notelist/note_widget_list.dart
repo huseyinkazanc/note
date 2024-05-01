@@ -12,7 +12,7 @@ class NoteWidgetGridView extends StatefulWidget {
   });
 
   final List<NoteGeneralContent> messages;
-  final Map<String, Color> messageColors;
+  final Map<int, Color> messageColors;
   final Function(NoteGeneralContent)? onLongPress;
 
   @override
@@ -36,20 +36,29 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
     );
 
     if (editedContent != null) {
-      _onSave(noteContent, editedContent); // Pass original and edited content to _onSave
+      _onSave(noteContent.id, editedContent); // Pass the ID of the original note
     }
   }
 
-  void _onSave(NoteGeneralContent originalContent, NoteGeneralContent editedContent) {
-    // Find the index of the original content in the messages list
-    int index = widget.messages.indexWhere((element) => element.messageTitle == originalContent.messageTitle);
+  void _onSave(int id, NoteGeneralContent editedContent) {
+    // Find the index of the original note in the messages list
+    int index = widget.messages.indexWhere((element) => element.id == editedContent.id);
 
     if (index != -1) {
-      // If the original content is found, replace it with the edited content
+      print('Original ID: $id');
+      print('Edited ID: ${editedContent.id}');
+      // If the original note is found, replace it with the edited content
       setState(() {
-        // Assign the edited title and content to the original note content
+        print('Before updating:');
+        print('Message Title: ${widget.messages[index].messageTitle}');
+        print('Message Content: ${widget.messages[index].messageContent}');
+
         widget.messages[index].messageTitle = editedContent.messageTitle;
         widget.messages[index].messageContent = editedContent.messageContent;
+
+        print('After updating:');
+        print('Message Title: ${widget.messages[index].messageTitle}');
+        print('Message Content: ${widget.messages[index].messageContent}');
       });
     }
   }
@@ -65,8 +74,8 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
             children: [
               // Below is the header of the grid view
               ...widget.messages.map((noteContent) {
-                final color = widget.messageColors[noteContent.messageTitle] ?? Colors.red;
-                final textColor = getTextColor(color);
+                final color = widget.messageColors[noteContent.id];
+                final textColor = getTextColor(color!);
                 return GestureDetector(
                   onLongPress: () {
                     if (widget.onLongPress != null) {
