@@ -11,6 +11,7 @@ class NoteWidgetListTile extends StatelessWidget {
     required this.isChecked,
     required this.onCheckChanged,
     required this.onEditPressed,
+    this.backgroundColor,
   });
 
   final NoteGeneralContent noteContent;
@@ -19,11 +20,12 @@ class NoteWidgetListTile extends StatelessWidget {
   final bool isChecked;
   final ValueChanged<bool?> onCheckChanged;
   final VoidCallback onEditPressed;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      tileColor: color,
+      tileColor: backgroundColor ?? color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(25.0),
       ),

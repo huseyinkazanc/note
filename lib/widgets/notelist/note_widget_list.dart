@@ -27,7 +27,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
     return luminance > 0.5 ? Colors.black : Colors.white;
   }
 
-  void _AlertDialogEdit(NoteGeneralContent noteContent) async {
+  void _alertDialogEdit(NoteGeneralContent noteContent) async {
     final editedContent = await showDialog<NoteGeneralContent>(
       context: context,
       builder: (BuildContext context) {
@@ -36,19 +36,22 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
     );
 
     if (editedContent != null) {
-      _onSave(noteContent, editedContent);
+      _onSave(noteContent, editedContent); // Pass original and edited content to _onSave
     }
   }
 
   void _onSave(NoteGeneralContent originalContent, NoteGeneralContent editedContent) {
-    setState(() {
-      final index = widget.messages.indexWhere((element) => element.messageTitle == originalContent.messageTitle);
-      if (index != -1) {
-        // Remove the original note and add the edited one
-        widget.messages.removeAt(index);
-        widget.messages.insert(index, editedContent);
-      }
-    });
+    // Find the index of the original content in the messages list
+    int index = widget.messages.indexWhere((element) => element.messageTitle == originalContent.messageTitle);
+
+    if (index != -1) {
+      // If the original content is found, replace it with the edited content
+      setState(() {
+        // Assign the edited title and content to the original note content
+        widget.messages[index].messageTitle = editedContent.messageTitle;
+        widget.messages[index].messageContent = editedContent.messageContent;
+      });
+    }
   }
 
   @override
@@ -62,7 +65,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
             children: [
               // Below is the header of the grid view
               ...widget.messages.map((noteContent) {
-                final color = widget.messageColors[noteContent.messageTitle] ?? Colors.white;
+                final color = widget.messageColors[noteContent.messageTitle] ?? Colors.red;
                 final textColor = getTextColor(color);
                 return GestureDetector(
                   onLongPress: () {
@@ -86,7 +89,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
                         });
                       },
                       onEditPressed: () {
-                        _AlertDialogEdit(noteContent);
+                        _alertDialogEdit(noteContent);
                       },
                     ),
                   ),

@@ -3,14 +3,16 @@ import 'package:note/features/note_colors.dart';
 import 'package:note/notecontent/note_general_content.dart';
 
 class NoteWidgetListEdit extends StatelessWidget {
-  final NoteGeneralContent noteContent;
-
   const NoteWidgetListEdit({super.key, required this.noteContent});
+
+  // For editing the note it is working with the NoteGeneralContent class
+  final NoteGeneralContent? noteContent;
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController titleController = TextEditingController(text: noteContent.messageTitle);
-    TextEditingController contentController = TextEditingController(text: noteContent.messageContent);
+    // Creating text controllers for the title and content
+    TextEditingController titleController = TextEditingController(text: noteContent!.messageTitle);
+    TextEditingController contentController = TextEditingController(text: noteContent!.messageContent);
 
     return AlertDialog(
       backgroundColor: NoteColors.darkBgColor,
