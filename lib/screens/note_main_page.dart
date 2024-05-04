@@ -3,6 +3,7 @@ import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
+import 'package:note/widgets/createNot/note_widget_create.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
 import 'package:note/widgets/main/note_widget_show_before_delete.dart';
 import 'package:note/widgets/notelist/note_widget_list.dart';
@@ -22,6 +23,22 @@ class _NoteMainPageState extends State<NoteMainPage> {
   TextEditingController searchController = TextEditingController();
   List<NoteGeneralContent> filteredMessages = [];
   int _listId = 0;
+
+  void _alertCreateNotPressed() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () {
+            Navigator.pop(context); // Close the dialog when tapped outside
+          },
+          child: NoteWidgetCreateNot(
+            alertDialogQuckNotePressed: _alertDialogPressed,
+          ),
+        );
+      },
+    );
+  }
 
   void _alertDialogPressed() async {
     popTitleController.clear();
@@ -215,7 +232,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
           ),
         ),
         floatingActionButton: NoteWidgetFloatingAction(
-          onPressed: _alertDialogPressed,
+          onPressed: _alertCreateNotPressed,
         ),
       ),
     );
