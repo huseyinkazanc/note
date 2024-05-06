@@ -3,6 +3,7 @@ import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
+import 'package:note/screens/note_message_page.dart';
 import 'package:note/widgets/createNot/note_widget_create.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
 import 'package:note/widgets/main/note_widget_show_before_delete.dart';
@@ -34,15 +35,22 @@ class _NoteMainPageState extends State<NoteMainPage> {
           },
           child: NoteWidgetCreateNot(
             alertDialogQuckNotePressed: _alertDialogPressed,
+            alertDialogDtlkNotePressed: alertDialogDtlkNotePressed,
           ),
         );
       },
     );
   }
 
+  void alertDialogDtlkNotePressed() {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const NoteMessagePage()));
+  }
+
   void _alertDialogPressed() async {
     popTitleController.clear();
     popExplainController.clear();
+    Navigator.pop(context);
 
     final result = await showDialog<NoteGeneralContent>(
       context: context,

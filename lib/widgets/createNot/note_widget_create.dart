@@ -4,9 +4,11 @@ import 'package:note/features/note_strings.dart';
 import 'package:note/widgets/common/note_widget_custom_textbutton.dart';
 
 class NoteWidgetCreateNot extends StatefulWidget {
-  const NoteWidgetCreateNot({super.key, required this.alertDialogQuckNotePressed});
+  const NoteWidgetCreateNot(
+      {super.key, required this.alertDialogQuckNotePressed, required this.alertDialogDtlkNotePressed});
 
   final void Function() alertDialogQuckNotePressed;
+  final void Function() alertDialogDtlkNotePressed;
 
   @override
   State<NoteWidgetCreateNot> createState() => _NoteWidgetCreateNotState();
@@ -39,7 +41,7 @@ class _NoteWidgetCreateNotState extends State<NoteWidgetCreateNot> {
               backgroundColor: NoteColors.greenColor,
             ),
             NoteWidgetCustomTextButton(
-              onPressed: () {},
+              onPressed: widget.alertDialogDtlkNotePressed,
               alertText: NoteStrings.appCreateAlrDtlTxt,
               fixedSize: const Size(125, 40),
               borderRadius: const BorderRadius.all(Radius.circular(5)),

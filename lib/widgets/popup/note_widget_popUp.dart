@@ -26,7 +26,7 @@ final TextEditingController popExplainController = TextEditingController();
 
 class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
   late List<Widget> scaledIcons;
-  Color? backgroundColor;
+  Color? backgroundColor = NoteColors.dark3bColor;
   @override
   void initState() {
     super.initState();
