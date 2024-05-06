@@ -33,7 +33,9 @@ class NoteWidgetListTile extends StatelessWidget {
         noteContent.messageTitle,
         style: TextStyle(color: textColor),
       ),
-      subtitle: Text(noteContent.messageContent),
+      subtitle: Text(
+        'Date: ${DateTime.now().toString().substring(0, 16)}',
+      ),
       leading: Checkbox(
         activeColor: color,
         side: BorderSide(

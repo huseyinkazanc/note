@@ -23,20 +23,23 @@ class NoteWidgetListEdit extends StatelessWidget {
             ),
       ),
       content: SizedBox(
-        height: 250,
+        height: MediaQuery.of(context).size.height * 0.4,
+        width: MediaQuery.of(context).size.width * 0.8,
         child: Column(
           children: [
             TextField(
+              maxLength: 20,
               controller: titleController,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: NoteColors.whiteColor,
                   ),
             ),
             TextFormField(
+              maxLength: 500,
               decoration: const InputDecoration(
                 border: InputBorder.none,
               ),
-              maxLines: 6,
+              maxLines: 5,
               controller: contentController,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: NoteColors.whiteColor,
