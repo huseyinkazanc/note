@@ -18,6 +18,8 @@ class _TitleMessageState extends State<NoteWidgetTitleMessage> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      autofocus: true,
+      maxLength: 20,
       controller: widget.textTitleController,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: NoteColors.whiteColor,

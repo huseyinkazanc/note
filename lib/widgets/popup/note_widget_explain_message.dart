@@ -19,8 +19,9 @@ class _ExplainMessageState extends State<NoteWidgetExplainMessage> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      maxLength: 500,
       controller: widget.textExplainController,
-      maxLines: 6,
+      maxLines: MediaQuery.of(context).size.height ~/ 110,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: NoteColors.whiteColor,
             fontSize: NoteFont.fontSizeEighteen,

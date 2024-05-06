@@ -62,7 +62,8 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
     return AlertDialog(
       backgroundColor: NoteColors.darkBgColor,
       content: SizedBox(
-        height: 250,
+        height: MediaQuery.of(context).size.height * 0.4,
+        width: MediaQuery.of(context).size.width * 0.8,
         child: Column(
           children: [
             NoteWidgetTitleMessage(

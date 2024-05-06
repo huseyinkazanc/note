@@ -8,15 +8,17 @@ class NoteWidgetIconColor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      highlightColor: iconColor,
-      padding: const EdgeInsets.all(0),
-      iconSize: 20,
-      icon: Icon(
-        iconButton,
-        color: iconColor,
+    return GestureDetector(
+      child: IconButton(
+        highlightColor: iconColor,
+        padding: const EdgeInsets.all(0),
+        iconSize: 20,
+        icon: Icon(
+          iconButton,
+          color: iconColor,
+        ),
+        onPressed: onPressed,
       ),
-      onPressed: onPressed,
     );
   }
 }
