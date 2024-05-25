@@ -7,8 +7,9 @@ import 'package:note/widgets/popup/note_widget_explain_message.dart';
 import 'package:note/widgets/popup/note_widget_icon_color.dart';
 import 'package:note/widgets/popup/note_widget_title_message.dart';
 
+// ignore: must_be_immutable
 class NoteWidgetPopUp extends StatefulWidget {
-  const NoteWidgetPopUp({
+  NoteWidgetPopUp({
     super.key,
     required this.onSave,
     required this.id,
@@ -16,7 +17,8 @@ class NoteWidgetPopUp extends StatefulWidget {
 
   final void Function(NoteGeneralContent, Color) onSave;
   final int id;
-
+  Color? backgroundColor = NoteColors.dark3bColor;
+  late List<Widget> scaledIcons;
   @override
   State<NoteWidgetPopUp> createState() => _NoteWidgetPopUpState();
 }
@@ -25,12 +27,10 @@ final TextEditingController popTitleController = TextEditingController();
 final TextEditingController popExplainController = TextEditingController();
 
 class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
-  late List<Widget> scaledIcons;
-  Color? backgroundColor = NoteColors.dark3bColor;
   @override
   void initState() {
     super.initState();
-    scaledIcons = List.generate(NoteColors.rainbowColors.length, (index) {
+    widget.scaledIcons = List.generate(NoteColors.rainbowColors.length, (index) {
       return ConstrainedBox(
         constraints: BoxConstraints.tight(const Size(30, 30)),
         child: NoteWidgetIconColor(
@@ -38,7 +38,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
           iconColor: NoteColors.rainbowColors[index],
           onPressed: () {
             setState(() {
-              backgroundColor = NoteColors.rainbowColors[index];
+              widget.backgroundColor = NoteColors.rainbowColors[index];
             });
           },
         ),
@@ -53,7 +53,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
       messageContent: popExplainController.text,
     );
     print('Pop id: ${widget.id}');
-    widget.onSave(noteContent, backgroundColor!);
+    widget.onSave(noteContent, widget.backgroundColor!);
     Navigator.of(context).pop();
   }
 
@@ -74,7 +74,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: scaledIcons,
+              children: widget.scaledIcons,
             ),
           ],
         ),

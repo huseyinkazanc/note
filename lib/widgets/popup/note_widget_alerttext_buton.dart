@@ -18,16 +18,16 @@ class NoteWidgetAlertTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: ButtonStyle(
-        shape: MaterialStateProperty.all(
+        shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
         ),
-        fixedSize: MaterialStateProperty.all(
+        fixedSize: WidgetStateProperty.all(
           const Size(80, 40),
         ),
-        backgroundColor: MaterialStateProperty.all(alertBgColor),
-        foregroundColor: MaterialStateProperty.all(alertTxtColor),
+        backgroundColor: WidgetStateProperty.all(alertBgColor),
+        foregroundColor: WidgetStateProperty.all(alertTxtColor),
       ),
       onPressed: onPressed,
       child: Text(alertText),
