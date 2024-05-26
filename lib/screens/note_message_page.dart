@@ -31,11 +31,8 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
 
   void _preserveTextColor() {
     final attrs = _controller.getSelectionStyle().attributes;
-    if (attrs.containsKey(Attribute.list.key)) {
-      // Ensure the text color is always set to white when a list is applied
-      if (!attrs.containsKey(Attribute.color.key) || attrs[Attribute.color.key]?.value != '#FFFFFF') {
-        _controller.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
-      }
+    if (!attrs.containsKey(Attribute.color.key) || attrs[Attribute.color.key]?.value != '#FFFFFF') {
+      _controller.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
     }
   }
 
@@ -54,13 +51,15 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
       _controller.formatSelection(Attribute.clone(Attribute.list, null));
     } else {
       _controller.formatSelection(Attribute.ul);
-      _controller.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
+      final textColor =
+          ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light ? '#000000' : '#FFFFFF';
+      _controller.formatSelection(Attribute.fromKeyValue('color', textColor)); // Set text color
+      // Custom bullet point style
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isSmallScreen = screenWidth < 600;
 
@@ -75,46 +74,67 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
         padding: EdgeInsets.all(isSmallScreen ? 16.0 : 32.0),
         child: Column(
           children: [
-            Container(
-              child: TextField(
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(16.0),
-                  hintText: NoteStrings.appAlrtDlgTitlHnt,
-                  hintStyle: TextStyle(
-                    fontSize: 20.0,
-                    color: (0.299 * NoteColors.darkBgColor.red +
-                                0.587 * NoteColors.darkBgColor.green +
-                                0.114 * NoteColors.darkBgColor.blue) >
-                            128
-                        ? Colors.black
-                        : Colors.white30,
-                  ),
-                  border: InputBorder.none,
-                ),
-                style: TextStyle(
-                  color: (0.299 * NoteColors.darkBgColor.red +
-                              0.587 * NoteColors.darkBgColor.green +
-                              0.114 * NoteColors.darkBgColor.blue) >
-                          128
-                      ? Colors.black
-                      : Colors.white,
-                ),
-                maxLines: 2,
-              ),
-            ),
             Expanded(
+              flex: 1,
               child: Container(
                 decoration: BoxDecoration(
                   color: ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light
                       ? NoteColors.whiteColor
                       : NoteColors.darkBgColor,
-                  //border: Border.all(color: Colors.amber),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.withOpacity(0.1),
                       spreadRadius: 2,
                       blurRadius: 1,
-                      offset: const Offset(0, 0), // changes position of shadow
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  autofocus: true,
+                  maxLength: 20,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(8.0),
+                    hintText: NoteStrings.appAlrtDlgTitlHnt,
+                    hintStyle: TextStyle(
+                      fontSize: 20.0,
+                      color: (0.299 * NoteColors.darkBgColor.red +
+                                  0.587 * NoteColors.darkBgColor.green +
+                                  0.114 * NoteColors.darkBgColor.blue) >
+                              128
+                          ? Colors.black
+                          : Colors.white30,
+                    ),
+                    border: InputBorder.none,
+                  ),
+                  style: TextStyle(
+                    color: (0.299 * NoteColors.darkBgColor.red +
+                                0.587 * NoteColors.darkBgColor.green +
+                                0.114 * NoteColors.darkBgColor.blue) >
+                            128
+                        ? Colors.black
+                        : Colors.white,
+                  ),
+                  maxLines: 1,
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 16.0,
+            ),
+            Expanded(
+              flex: 9,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light
+                      ? NoteColors.whiteColor
+                      : NoteColors.darkBgColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 1,
+                      offset: const Offset(0, 0),
                     ),
                   ],
                   borderRadius: BorderRadius.circular(10),
@@ -147,11 +167,17 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
                     scrollable: true,
                     autoFocus: true,
                     expands: false,
-                    textSelectionThemeData: const TextSelectionThemeData(
-                        // cursorColor: Colors.blue,
-                        // selectionColor: Colors.blue,
-                        // selectionHandleColor: Colors.red,
+                    elementOptions: const QuillEditorElementOptions(
+                      unorderedList: QuillEditorUnOrderedListElementOptions(
+                        // Set the bullet color to red
+                        useTextColorForDot: false,
+                        customWidget: Text(
+                          '•',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
+                      ),
+                    ),
+                    textSelectionThemeData: const TextSelectionThemeData(),
                     sharedConfigurations: const QuillSharedConfigurations(
                       locale: Locale('de'),
                     ),
@@ -299,6 +325,42 @@ class CustomQuillToolbar extends StatelessWidget {
                 );
               },
             ),
+            QuillToolbarCustomButtonOptions(
+              childBuilder: (options, extraOptions) {
+                return QuillCustomButton(
+                  icon: Icons.format_align_left,
+                  fillColor: NoteColors.whiteColor,
+                  iconColor: NoteColors.whiteColor,
+                  onPressed: () {
+                    toggleAttribute(Attribute.leftAlignment);
+                  },
+                );
+              },
+            ),
+            QuillToolbarCustomButtonOptions(
+              childBuilder: (options, extraOptions) {
+                return QuillCustomButton(
+                  icon: Icons.format_align_center,
+                  fillColor: NoteColors.whiteColor,
+                  iconColor: NoteColors.whiteColor,
+                  onPressed: () {
+                    toggleAttribute(Attribute.centerAlignment);
+                  },
+                );
+              },
+            ),
+            QuillToolbarCustomButtonOptions(
+              childBuilder: (options, extraOptions) {
+                return QuillCustomButton(
+                  icon: Icons.format_align_right,
+                  fillColor: NoteColors.whiteColor,
+                  iconColor: NoteColors.whiteColor,
+                  onPressed: () {
+                    toggleAttribute(Attribute.rightAlignment);
+                  },
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -324,6 +386,7 @@ class QuillCustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       icon: Icon(icon),
+      style: const ButtonStyle(),
       color: iconColor,
       onPressed: onPressed,
       tooltip: '',
