@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
@@ -42,9 +43,22 @@ class _NoteMainPageState extends State<NoteMainPage> {
     );
   }
 
-  void alertDialogDtlkNotePressed() {
+  void alertDialogDtlkNotePressed() async {
+    notTitleController.clear();
+    notContentController.clear();
+
     Navigator.pop(context);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const NoteMessagePage()));
+
+    final result = await showDialog<NoteGeneralContent>(
+      context: context,
+      builder: (context) => NoteMessagePage(
+        id: _listId,
+        onSave: _saveText,
+      ),
+    );
+    if (result != null) {
+      _saveText(result);
+    }
   }
 
   void _alertDialogPressed() async {

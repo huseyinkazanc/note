@@ -2,60 +2,76 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_strings.dart';
+import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/widgets/popup/note_widget_alerttext_buton.dart';
 
 class NoteMessagePage extends StatefulWidget {
-  const NoteMessagePage({super.key});
+  const NoteMessagePage({super.key, required this.onSave, required this.id});
+
+  final void Function(NoteGeneralContent, Color) onSave;
+  final int id;
 
   @override
   State<NoteMessagePage> createState() => _NoteMessagePageState();
 }
 
+final TextEditingController notTitleController = TextEditingController();
+final QuillController notContentController = QuillController.basic();
+
 class _NoteMessagePageState extends State<NoteMessagePage> {
   final Color _backGroundColor = NoteColors.darkBgColor;
-  final QuillController _controller = QuillController.basic();
-  TextEditingController contentText = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(_preserveTextColor);
+    notContentController.addListener(_preserveTextColor);
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_preserveTextColor);
-    _controller.dispose();
+    notContentController.removeListener(_preserveTextColor);
+    notContentController.dispose();
     super.dispose();
   }
 
   void _preserveTextColor() {
-    final attrs = _controller.getSelectionStyle().attributes;
+    final attrs = notContentController.getSelectionStyle().attributes;
     if (!attrs.containsKey(Attribute.color.key) || attrs[Attribute.color.key]?.value != '#FFFFFF') {
-      _controller.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
+      notContentController.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
     }
   }
 
   void _toggleAttribute(Attribute attribute) {
-    final isAttributeToggled = _controller.getSelectionStyle().containsKey(attribute.key);
+    final isAttributeToggled = notContentController.getSelectionStyle().containsKey(attribute.key);
     if (isAttributeToggled) {
-      _controller.formatSelection(Attribute.clone(attribute, null));
+      notContentController.formatSelection(Attribute.clone(attribute, null));
     } else {
-      _controller.formatSelection(attribute);
+      notContentController.formatSelection(attribute);
     }
   }
 
   void _toggleList() {
-    final attrs = _controller.getSelectionStyle().attributes;
+    final attrs = notContentController.getSelectionStyle().attributes;
     if (attrs.containsKey(Attribute.list.key)) {
-      _controller.formatSelection(Attribute.clone(Attribute.list, null));
+      notContentController.formatSelection(Attribute.clone(Attribute.list, null));
     } else {
-      _controller.formatSelection(Attribute.ul);
+      notContentController.formatSelection(Attribute.ul);
       final textColor =
           ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light ? '#000000' : '#FFFFFF';
-      _controller.formatSelection(Attribute.fromKeyValue('color', textColor)); // Set text color
+      notContentController.formatSelection(Attribute.fromKeyValue('color', textColor)); // Set text color
       // Custom bullet point style
     }
+  }
+
+  void saveButton() {
+    final noteContent = NoteGeneralContent(
+      id: widget.id,
+      messageTitle: notTitleController.text,
+      messageContent: notContentController.document.toPlainText(),
+    );
+    print('Pop id: ${widget.id}');
+    widget.onSave(noteContent, Colors.white);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -74,57 +90,44 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
         padding: EdgeInsets.all(isSmallScreen ? 16.0 : 32.0),
         child: Column(
           children: [
-            Expanded(
-              flex: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light
-                      ? NoteColors.whiteColor
-                      : NoteColors.darkBgColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.1),
-                      spreadRadius: 2,
-                      blurRadius: 1,
-                      offset: const Offset(0, 0),
-                    ),
-                  ],
+            TextField(
+              controller: notTitleController,
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: NoteStrings.appAlrtDlgTitlHnt,
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Color.fromARGB(50, 83, 81, 81), width: 2.0),
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
-                child: TextField(
-                  autofocus: true,
-                  maxLength: 20,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.all(8.0),
-                    hintText: NoteStrings.appAlrtDlgTitlHnt,
-                    hintStyle: TextStyle(
-                      fontSize: 20.0,
-                      color: (0.299 * NoteColors.darkBgColor.red +
-                                  0.587 * NoteColors.darkBgColor.green +
-                                  0.114 * NoteColors.darkBgColor.blue) >
-                              128
-                          ? Colors.black
-                          : Colors.white30,
-                    ),
-                    border: InputBorder.none,
-                  ),
-                  style: TextStyle(
-                    color: (0.299 * NoteColors.darkBgColor.red +
-                                0.587 * NoteColors.darkBgColor.green +
-                                0.114 * NoteColors.darkBgColor.blue) >
-                            128
-                        ? Colors.black
-                        : Colors.white,
-                  ),
-                  maxLines: 1,
+                border: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Color.fromARGB(50, 83, 81, 81), width: 2.0),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                hintStyle: TextStyle(
+                  fontSize: 20.0,
+                  color: (0.299 * NoteColors.darkBgColor.red +
+                              0.587 * NoteColors.darkBgColor.green +
+                              0.114 * NoteColors.darkBgColor.blue) >
+                          128
+                      ? Colors.black
+                      : Colors.white30,
                 ),
               ),
+              style: TextStyle(
+                color: (0.299 * NoteColors.darkBgColor.red +
+                            0.587 * NoteColors.darkBgColor.green +
+                            0.114 * NoteColors.darkBgColor.blue) >
+                        128
+                    ? Colors.black
+                    : Colors.white,
+              ),
             ),
-            const SizedBox(
-              height: 16.0,
+            SizedBox(
+              height: isSmallScreen ? 10.0 : 16.0,
             ),
             Expanded(
-              flex: 9,
               child: Container(
+                height: MediaQuery.of(context).size.height * 0.6,
                 decoration: BoxDecoration(
                   color: ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light
                       ? NoteColors.whiteColor
@@ -181,7 +184,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
                     sharedConfigurations: const QuillSharedConfigurations(
                       locale: Locale('de'),
                     ),
-                    controller: _controller,
+                    controller: notContentController,
                   ),
                 ),
               ),
@@ -190,7 +193,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
               height: 8.0,
             ),
             CustomQuillToolbar(
-              controller: _controller,
+              controller: notContentController,
               toggleAttribute: _toggleAttribute,
               toggleList: _toggleList,
             ),
@@ -210,7 +213,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
                 SizedBox(width: isSmallScreen ? 8.0 : 32.0),
                 Expanded(
                   child: NoteWidgetAlertTextButton(
-                    onPressed: () {},
+                    onPressed: saveButton,
                     alertBgColor: NoteColors.greenColor,
                     alertTxtColor: NoteColors.whiteColor,
                     alertText: NoteStrings.appAlrtBtnSvTxt,
