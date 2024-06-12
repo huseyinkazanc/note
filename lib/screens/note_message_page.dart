@@ -4,62 +4,71 @@ import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/widgets/popup/note_widget_alerttext_buton.dart';
+import 'dart:convert';
 
 class NoteMessagePage extends StatefulWidget {
-  const NoteMessagePage({super.key, required this.onSave, required this.id});
+  const NoteMessagePage({
+    super.key,
+    required this.onSave,
+    required this.id,
+    required this.notContentController,
+    required this.initialColor, // Yeni parametre
+  });
 
   final void Function(NoteGeneralContent, Color) onSave;
   final int id;
+  final QuillController notContentController;
+  final Color initialColor; // Yeni parametre
 
   @override
   State<NoteMessagePage> createState() => _NoteMessagePageState();
 }
 
 final TextEditingController notTitleController = TextEditingController();
-final QuillController notContentController = QuillController.basic();
+QuillController notContentController = QuillController.basic();
 
 class _NoteMessagePageState extends State<NoteMessagePage> {
-  final Color _backGroundColor = NoteColors.darkBgColor;
+  Color? _listBackgroundColor; // Renk değişkeni
 
   @override
   void initState() {
     super.initState();
-    notContentController.addListener(_preserveTextColor);
+    _listBackgroundColor = widget.initialColor; // Başlangıç rengini ayarla
+    widget.notContentController.addListener(_preserveTextColor);
+    print('NoteMessagePage initialized with document: ${widget.notContentController.document.toPlainText()}');
   }
 
   @override
   void dispose() {
-    notContentController.removeListener(_preserveTextColor);
-    notContentController.dispose();
+    widget.notContentController.removeListener(_preserveTextColor);
     super.dispose();
   }
 
   void _preserveTextColor() {
-    final attrs = notContentController.getSelectionStyle().attributes;
+    final attrs = widget.notContentController.getSelectionStyle().attributes;
     if (!attrs.containsKey(Attribute.color.key) || attrs[Attribute.color.key]?.value != '#FFFFFF') {
-      notContentController.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
+      widget.notContentController.formatSelection(Attribute.fromKeyValue('color', '#FFFFFF'));
     }
   }
 
   void _toggleAttribute(Attribute attribute) {
-    final isAttributeToggled = notContentController.getSelectionStyle().containsKey(attribute.key);
+    final isAttributeToggled = widget.notContentController.getSelectionStyle().containsKey(attribute.key);
     if (isAttributeToggled) {
-      notContentController.formatSelection(Attribute.clone(attribute, null));
+      widget.notContentController.formatSelection(Attribute.clone(attribute, null));
     } else {
-      notContentController.formatSelection(attribute);
+      widget.notContentController.formatSelection(attribute);
     }
   }
 
   void _toggleList() {
-    final attrs = notContentController.getSelectionStyle().attributes;
+    final attrs = widget.notContentController.getSelectionStyle().attributes;
     if (attrs.containsKey(Attribute.list.key)) {
-      notContentController.formatSelection(Attribute.clone(Attribute.list, null));
+      widget.notContentController.formatSelection(Attribute.clone(Attribute.list, null));
     } else {
-      notContentController.formatSelection(Attribute.ul);
+      widget.notContentController.formatSelection(Attribute.ul);
       final textColor =
-          ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light ? '#000000' : '#FFFFFF';
-      notContentController.formatSelection(Attribute.fromKeyValue('color', textColor)); // Set text color
-      // Custom bullet point style
+          ThemeData.estimateBrightnessForColor(NoteColors.darkBgColor) == Brightness.light ? '#000000' : '#FFFFFF';
+      widget.notContentController.formatSelection(Attribute.fromKeyValue('color', textColor)); // Set text color
     }
   }
 
@@ -67,11 +76,12 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
     final noteContent = NoteGeneralContent(
       id: widget.id,
       messageTitle: notTitleController.text,
-      messageContent: notContentController.document.toPlainText(),
+      messageContent: jsonEncode(widget.notContentController.document.toDelta().toJson()), // Convert to JSON string
     );
     print('Pop id: ${widget.id}');
-    widget.onSave(noteContent, Colors.white);
-    Navigator.of(context).pop();
+    widget.onSave(noteContent,
+        _listBackgroundColor ?? widget.initialColor); // Renk değişmişse yeni rengi, aksi takdirde eski rengi kullan
+    Navigator.of(context).pop(); // Return the note content on save
   }
 
   @override
@@ -80,11 +90,40 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
     final bool isSmallScreen = screenWidth < 600;
 
     return Scaffold(
-      backgroundColor: _backGroundColor,
+      backgroundColor: NoteColors.darkBgColor,
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: NoteColors.darkBgColor,
         foregroundColor: NoteColors.whiteColor,
-        title: const Text(NoteStrings.appCreateAlrDtlTxt),
+        titleSpacing: 0, // Title ve actions'u daha yakın yapmak için spacing'i azaltın
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            const Text(NoteStrings.appCreateAlrDtlTxt),
+            const SizedBox(width: 10), // Title ve dropdown arasında boşluk ekleyin
+            DropdownButton<Color>(
+              icon: Icon(Icons.color_lens, color: NoteColors.whiteColor),
+              underline: Container(),
+              items: NoteColors.rainbowColors.map((color) {
+                return DropdownMenuItem<Color>(
+                  value: color,
+                  child: Container(
+                    width: 24,
+                    height: 24,
+                    color: color,
+                  ),
+                );
+              }).toList(),
+              onChanged: (Color? newColor) {
+                if (newColor != null) {
+                  setState(() {
+                    _listBackgroundColor = newColor; // Yeni rengi ayarla
+                  });
+                }
+              },
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(isSmallScreen ? 16.0 : 32.0),
@@ -129,7 +168,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.6,
                 decoration: BoxDecoration(
-                  color: ThemeData.estimateBrightnessForColor(_backGroundColor) == Brightness.light
+                  color: ThemeData.estimateBrightnessForColor(NoteColors.darkBgColor) == Brightness.light
                       ? NoteColors.whiteColor
                       : NoteColors.darkBgColor,
                   boxShadow: [
@@ -184,7 +223,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
                     sharedConfigurations: const QuillSharedConfigurations(
                       locale: Locale('de'),
                     ),
-                    controller: notContentController,
+                    controller: widget.notContentController,
                   ),
                 ),
               ),
@@ -193,7 +232,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
               height: 8.0,
             ),
             CustomQuillToolbar(
-              controller: notContentController,
+              controller: widget.notContentController,
               toggleAttribute: _toggleAttribute,
               toggleList: _toggleList,
             ),

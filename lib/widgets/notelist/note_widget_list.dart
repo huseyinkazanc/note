@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note/notecontent/note_general_content.dart';
-import 'package:note/widgets/notelist/note_widget_list_edit.dart';
+import 'package:note/screens/note_message_page.dart';
 import 'package:note/widgets/notelist/note_widget_list_tile.dart';
+import 'dart:convert';
 
 class NoteWidgetGridView extends StatefulWidget {
   const NoteWidgetGridView({
@@ -28,21 +30,32 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
   }
 
   void _alertDialogEdit(NoteGeneralContent noteContent) async {
-    final editedContent = await showDialog<NoteGeneralContent>(
-      context: context,
-      builder: (BuildContext context) {
-        return NoteWidgetListEdit(noteContent: noteContent);
-      },
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoteMessagePage(
+          id: noteContent.id,
+          onSave: (editedContent, color) {
+            _onSave(noteContent.id, editedContent, color); // Pass the ID of the original note and the color
+          },
+          notContentController: QuillController(
+            document: Document.fromJson(jsonDecode(noteContent.messageContent)), // Convert the string to JSON
+            selection: const TextSelection.collapsed(offset: 0),
+          ),
+          initialColor: widget.messageColors[noteContent.id] ?? Colors.white, // Pass the initial color
+        ),
+      ),
     );
 
-    if (editedContent != null) {
-      _onSave(noteContent.id, editedContent); // Pass the ID of the original note
+    if (result != null) {
+      _onSave(noteContent.id, result,
+          widget.messageColors[noteContent.id]!); // Pass the ID of the original note and the color
     }
   }
 
-  void _onSave(int id, NoteGeneralContent editedContent) {
+  void _onSave(int id, NoteGeneralContent editedContent, Color color) {
     // Find the index of the original note in the messages list
-    int index = widget.messages.indexWhere((element) => element.id == editedContent.id);
+    int index = widget.messages.indexWhere((element) => element.id == id);
 
     if (index != -1) {
       print('Original ID: $id');
@@ -55,6 +68,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
 
         widget.messages[index].messageTitle = editedContent.messageTitle;
         widget.messages[index].messageContent = editedContent.messageContent;
+        widget.messageColors[id] = color; // Update the color
 
         print('After updating:');
         print('Message Title: ${widget.messages[index].messageTitle}');
@@ -65,49 +79,54 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: constraints.minHeight),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Below is the header of the grid view
-              ...widget.messages.map((noteContent) {
-                final color = widget.messageColors[noteContent.id];
-                final textColor = getTextColor(color!);
-                return GestureDetector(
-                  onLongPress: () {
-                    if (widget.onLongPress != null) {
-                      widget.onLongPress!(noteContent);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.minHeight),
+            child: Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ...widget.messages.map((noteContent) {
+                    final color = widget.messageColors[noteContent.id];
+                    if (color == null) {
+                      return const SizedBox(); // or some other widget to indicate missing color
                     }
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      side: const BorderSide(),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    child: NoteWidgetListTile(
-                      noteContent: noteContent,
-                      color: color,
-                      textColor: textColor,
-                      isChecked: _isCheckedMap[noteContent.messageTitle] ?? false,
-                      onCheckChanged: (newValue) {
-                        setState(() {
-                          _isCheckedMap[noteContent.messageTitle] = newValue ?? false;
-                        });
+                    final textColor = getTextColor(color);
+                    return GestureDetector(
+                      onLongPress: () {
+                        if (widget.onLongPress != null) {
+                          widget.onLongPress!(noteContent);
+                        }
                       },
-                      onEditPressed: () {
-                        _alertDialogEdit(noteContent);
-                      },
-                    ),
-                  ),
-                );
-              }),
-            ],
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                        ),
+                        child: NoteWidgetListTile(
+                          noteContent: noteContent,
+                          color: color,
+                          textColor: textColor,
+                          isChecked: _isCheckedMap[noteContent.messageTitle] ?? false,
+                          onCheckChanged: (newValue) {
+                            setState(() {
+                              _isCheckedMap[noteContent.messageTitle] = newValue ?? false;
+                            });
+                          },
+                          onEditPressed: () {
+                            _alertDialogEdit(noteContent);
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
           ),
-        ),
-      );
-    });
+        );
+      },
+    );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note/features/note_colors.dart';
@@ -5,13 +7,11 @@ import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/screens/note_message_page.dart';
-import 'package:note/widgets/createNot/note_widget_create.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
 import 'package:note/widgets/main/note_widget_show_before_delete.dart';
-import 'package:note/widgets/notelist/note_widget_list.dart';
 import 'package:note/widgets/common/note_widget_custom_iconbutton.dart';
-import 'package:note/widgets/popup/note_widget_popUp.dart';
 import 'package:note/widgets/main/note_widget_showModelBottomSheet.dart';
+import 'package:note/widgets/notelist/note_widget_list.dart';
 
 class NoteMainPage extends StatefulWidget {
   NoteMainPage({super.key});
@@ -25,62 +25,43 @@ class _NoteMainPageState extends State<NoteMainPage> {
   TextEditingController searchController = TextEditingController();
   List<NoteGeneralContent> filteredMessages = [];
   int _listId = 0;
+  Color _listBackgroundColor = Colors.white; // Default background color
 
   void _alertCreateNotPressed() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.pop(context); // Close the dialog when tapped outside
-          },
-          child: NoteWidgetCreateNot(
-            alertDialogQuckNotePressed: _alertDialogPressed,
-            alertDialogDtlkNotePressed: alertDialogDtlkNotePressed,
-          ),
+    try {
+      notTitleController.clear();
+
+      // Safely reset the QuillController by reinitializing it with an empty document
+      setState(() {
+        notContentController = QuillController(
+          document: Document(),
+          selection: const TextSelection.collapsed(offset: 0),
         );
-      },
-    );
-  }
+      });
 
-  void alertDialogDtlkNotePressed() async {
-    notTitleController.clear();
-    notContentController.clear();
-
-    Navigator.pop(context);
-
-    final result = await showDialog<NoteGeneralContent>(
-      context: context,
-      builder: (context) => NoteMessagePage(
-        id: _listId,
-        onSave: _saveText,
-      ),
-    );
-    if (result != null) {
-      _saveText(result);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NoteMessagePage(
+            id: _listId,
+            onSave: _saveText,
+            notContentController: notContentController, // Pass the new controller to the dialog
+            initialColor: _listBackgroundColor, // Pass the initial color
+          ),
+        ),
+      ).then((result) {
+        if (result != null) {
+          _saveText(result, _listBackgroundColor); // Pass the selected background color
+        }
+      });
+    } catch (error) {
+      print('Error occurred in _alertCreateNotPressed: $error');
+      // Optionally show a user-friendly message
     }
   }
 
-  void _alertDialogPressed() async {
-    popTitleController.clear();
-    popExplainController.clear();
-    Navigator.pop(context);
-
-    final result = await showDialog<NoteGeneralContent>(
-      context: context,
-      builder: (context) => NoteWidgetPopUp(
-        id: _listId,
-        onSave: _saveText,
-      ),
-    );
-    if (result != null) {
-      _saveText(result);
-    }
-  }
-
-  void _saveText(NoteGeneralContent noteContent, [Color? backgroundColor]) {
+  void _saveText(NoteGeneralContent noteContent, Color backgroundColor) {
     setState(() {
-      //final randomColor = NoteColors.rainbowColors[widget.messages.length % NoteColors.rainbowColors.length];
       final id = _listId++;
       final noteWithId = NoteGeneralContent(
         id: id,
@@ -88,10 +69,33 @@ class _NoteMainPageState extends State<NoteMainPage> {
         messageContent: noteContent.messageContent,
       );
       widget.messages.add(noteWithId);
-      widget.messageColors[noteContent.id] = backgroundColor!;
-      // Update filtered messages based on search query
+      widget.messageColors[noteContent.id] = backgroundColor;
+      _listBackgroundColor = backgroundColor; // Set the list background color
       _filterMessages(searchController.text);
     });
+  }
+
+  void _alertDialogEdit(NoteGeneralContent noteContent) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoteMessagePage(
+          id: noteContent.id,
+          onSave: (editedContent, color) {
+            _saveText(editedContent, color); // Pass the ID of the original note and the color
+          },
+          notContentController: QuillController(
+            document: Document.fromJson(jsonDecode(noteContent.messageContent)), // Convert the string to JSON
+            selection: const TextSelection.collapsed(offset: 0),
+          ),
+          initialColor: widget.messageColors[noteContent.id] ?? Colors.white, // Pass the initial color
+        ),
+      ),
+    );
+
+    if (result != null) {
+      _saveText(result, widget.messageColors[noteContent.id]!); // Pass the ID of the original note and the color
+    }
   }
 
   void _showListTileDetails(NoteGeneralContent noteContent) {
@@ -107,16 +111,10 @@ class _NoteMainPageState extends State<NoteMainPage> {
                 return NoteWidgetBeforeDelete(
                   onDelete: () {
                     setState(() {
-                      // Find the index of the note to be deleted
                       int indexToDelete = widget.messages.indexOf(noteContent);
                       if (indexToDelete != -1) {
-                        // Remove the note at the found index
                         widget.messages.removeAt(indexToDelete);
-
-                        // Remove the message's color from the map
                         widget.messageColors.remove(noteContent.messageTitle);
-
-                        // Update filtered messages based on search query
                         _filterMessages(searchController.text);
                       }
                       Navigator.pop(context);
@@ -129,31 +127,24 @@ class _NoteMainPageState extends State<NoteMainPage> {
         );
       },
     );
-
-    print('After deleting note: $noteContent');
   }
 
-  // Filter messages based on search query
   void _filterMessages(String query) {
     if (query.isEmpty) {
-      // If query is empty, display all messages
       setState(() {
         filteredMessages = List.from(widget.messages);
       });
     } else {
-      // Filter messages based on search query
       setState(() {
         filteredMessages = widget.messages
             .where((message) => message.messageTitle.toLowerCase().contains(query.toLowerCase()))
             .toList();
       });
     }
-
-    print('Filtered Messages: $filteredMessages');
   }
 
   bool isSearchExpanded = false;
-  // Toggle search bar
+
   void toggleSearchBar() {
     setState(() {
       if (searchController.text.isNotEmpty) {
@@ -166,7 +157,6 @@ class _NoteMainPageState extends State<NoteMainPage> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // Collapse search bar when tapping anywhere on the page
         if (isSearchExpanded) {
           setState(() {
             isSearchExpanded = false;
@@ -196,10 +186,10 @@ class _NoteMainPageState extends State<NoteMainPage> {
                             contentPadding: const EdgeInsets.only(left: 15),
                           ),
                           onSubmitted: (value) {
-                            toggleSearchBar(); // Collapse the search bar after search
+                            toggleSearchBar();
                           },
                           onChanged: (value) {
-                            _filterMessages(value); // Filter messages as user types
+                            _filterMessages(value);
                           },
                         ),
                       ),
@@ -237,18 +227,21 @@ class _NoteMainPageState extends State<NoteMainPage> {
                     iconButton: Icons.search,
                     onPressed: () {
                       setState(() {
-                        isSearchExpanded = true; // Open search field
+                        isSearchExpanded = true;
                       });
                     },
                   ),
-                  NoteWidgetCustomIconButton(iconButton: Icons.info, onPressed: () {}),
+                  NoteWidgetCustomIconButton(
+                    iconButton: Icons.info,
+                    onPressed: () {},
+                  ),
                 ],
           backgroundColor: NoteColors.darkBgColor,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8),
           child: NoteWidgetGridView(
-            messages: filteredMessages, // Display filtered messages
+            messages: filteredMessages,
             messageColors: widget.messageColors,
             onLongPress: _showListTileDetails,
           ),
