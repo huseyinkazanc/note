@@ -12,20 +12,22 @@ class NoteMessagePage extends StatefulWidget {
     required this.onSave,
     required this.id,
     required this.notContentController,
-    required this.initialColor, // Yeni parametre
+    required this.notTitleController, // Yeni parametre
   });
 
   final void Function(NoteGeneralContent, Color) onSave;
   final int id;
   final QuillController notContentController;
-  final Color initialColor; // Yeni parametre
+
+  final TextEditingController notTitleController;
+//final Color initialColor; // Yeni parametre
 
   @override
   State<NoteMessagePage> createState() => _NoteMessagePageState();
 }
 
-final TextEditingController notTitleController = TextEditingController();
 QuillController notContentController = QuillController.basic();
+TextEditingController notTitleController = TextEditingController();
 
 class _NoteMessagePageState extends State<NoteMessagePage> {
   Color? _listBackgroundColor; // Renk değişkeni
@@ -33,7 +35,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
   @override
   void initState() {
     super.initState();
-    _listBackgroundColor = widget.initialColor; // Başlangıç rengini ayarla
+    _listBackgroundColor = Colors.white; // Başlangıç rengini ayarla
     widget.notContentController.addListener(_preserveTextColor);
     print('NoteMessagePage initialized with document: ${widget.notContentController.document.toPlainText()}');
   }
@@ -75,12 +77,12 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
   void saveButton() {
     final noteContent = NoteGeneralContent(
       id: widget.id,
-      messageTitle: notTitleController.text,
+      messageTitle: widget.notTitleController.text,
       messageContent: jsonEncode(widget.notContentController.document.toDelta().toJson()), // Convert to JSON string
+      noteColor: _listBackgroundColor,
     );
     print('Pop id: ${widget.id}');
-    widget.onSave(noteContent,
-        _listBackgroundColor ?? widget.initialColor); // Renk değişmişse yeni rengi, aksi takdirde eski rengi kullan
+    widget.onSave(noteContent, _listBackgroundColor ?? Colors.white); // Return the note content and color on save
     Navigator.of(context).pop(); // Return the note content on save
   }
 
@@ -101,6 +103,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
           children: [
             const Text(NoteStrings.appCreateAlrDtlTxt),
             const SizedBox(width: 10), // Title ve dropdown arasında boşluk ekleyin
+
             DropdownButton<Color>(
               icon: Icon(Icons.color_lens, color: NoteColors.whiteColor),
               underline: Container(),
@@ -130,7 +133,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
         child: Column(
           children: [
             TextField(
-              controller: notTitleController,
+              controller: widget.notTitleController,
               autofocus: true,
               decoration: InputDecoration(
                 hintText: NoteStrings.appAlrtDlgTitlHnt,
