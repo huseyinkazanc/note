@@ -38,11 +38,12 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
           onSave: (editedContent, color) {
             _onSave(noteContent.id, editedContent, color); // Pass the ID of the original note and the color
           },
+          notTitleController: TextEditingController(text: noteContent.messageTitle),
           notContentController: QuillController(
             document: Document.fromJson(jsonDecode(noteContent.messageContent)), // Convert the string to JSON
             selection: const TextSelection.collapsed(offset: 0),
           ),
-          initialColor: widget.messageColors[noteContent.id] ?? Colors.white, // Pass the initial color
+          // Pass the initial color
         ),
       ),
     );
