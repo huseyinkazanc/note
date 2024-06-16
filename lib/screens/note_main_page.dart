@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note/features/note_colors.dart';
@@ -27,6 +26,10 @@ class _NoteMainPageState extends State<NoteMainPage> {
   int _listId = 0;
   Color _listBackgroundColor = Colors.white; // Default background color
 
+  // Title and content controllers
+  TextEditingController notTitleController = TextEditingController();
+  QuillController notContentController = QuillController.basic();
+
   void _alertCreateNotPressed() {
     try {
       notTitleController.clear();
@@ -46,7 +49,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
             id: _listId,
             onSave: _saveText,
             notContentController: notContentController, // Pass the new controller to the dialog
-            initialColor: _listBackgroundColor, // Pass the initial color
+            notTitleController: notTitleController, // Pass the initial color
           ),
         ),
       ).then((result) {
@@ -67,35 +70,58 @@ class _NoteMainPageState extends State<NoteMainPage> {
         id: id,
         messageTitle: noteContent.messageTitle,
         messageContent: noteContent.messageContent,
+        noteColor: backgroundColor, // Set the background color
       );
       widget.messages.add(noteWithId);
-      widget.messageColors[noteContent.id] = backgroundColor;
+      widget.messageColors[noteWithId.id] = backgroundColor;
       _listBackgroundColor = backgroundColor; // Set the list background color
       _filterMessages(searchController.text);
     });
   }
 
+/*
   void _alertDialogEdit(NoteGeneralContent noteContent) async {
+    notTitleController.text = noteContent.messageTitle;
+
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => NoteMessagePage(
           id: noteContent.id,
           onSave: (editedContent, color) {
-            _saveText(editedContent, color); // Pass the ID of the original note and the color
+            Navigator.pop(context, {'content': editedContent, 'color': color});
           },
           notContentController: QuillController(
             document: Document.fromJson(jsonDecode(noteContent.messageContent)), // Convert the string to JSON
             selection: const TextSelection.collapsed(offset: 0),
           ),
-          initialColor: widget.messageColors[noteContent.id] ?? Colors.white, // Pass the initial color
+          initialColor: widget.messageColors[noteContent.id] ?? Colors.white,
+          notTitleController: notTitleController, // Pass the title controller
         ),
       ),
     );
 
     if (result != null) {
-      _saveText(result, widget.messageColors[noteContent.id]!); // Pass the ID of the original note and the color
+      final editedContent = result['content'] as NoteGeneralContent;
+      final color = result['color'] as Color;
+      _onSave(noteContent.id, editedContent, color);
     }
+  }
+  */
+
+  void _onSave(int id, NoteGeneralContent editedContent, Color color) {
+    setState(() {
+      int index = widget.messages.indexWhere((element) => element.id == id);
+      if (index != -1) {
+        // Ensure that the title is updated correctly
+        widget.messages[index] = NoteGeneralContent(
+          id: id,
+          messageTitle: editedContent.messageTitle,
+          messageContent: editedContent.messageContent,
+        );
+        widget.messageColors[id] = color;
+      }
+    });
   }
 
   void _showListTileDetails(NoteGeneralContent noteContent) {
@@ -136,9 +162,16 @@ class _NoteMainPageState extends State<NoteMainPage> {
       });
     } else {
       setState(() {
-        filteredMessages = widget.messages
-            .where((message) => message.messageTitle.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+        filteredMessages = widget.messages.where((message) {
+          final titleMatches = message.messageTitle.toLowerCase().contains(query.toLowerCase());
+
+          // Parse the Quill Delta JSON to a list of operations
+          final document = Document.fromJson(jsonDecode(message.messageContent));
+          final plainText = document.toPlainText();
+          final contentMatches = plainText.toLowerCase().contains(query.toLowerCase());
+
+          return titleMatches || contentMatches;
+        }).toList();
       });
     }
   }
