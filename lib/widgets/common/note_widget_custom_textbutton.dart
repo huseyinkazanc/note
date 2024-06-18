@@ -22,18 +22,18 @@ class NoteWidgetCustomTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: ButtonStyle(
-        shape: MaterialStateProperty.all(
+        shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: borderRadius,
           ),
         ),
-        fixedSize: MaterialStateProperty.all(
+        fixedSize: WidgetStateProperty.all(
           fixedSize,
         ),
-        backgroundColor: MaterialStateProperty.all(
+        backgroundColor: WidgetStateProperty.all(
           backgroundColor,
         ),
-        foregroundColor: MaterialStateProperty.all(
+        foregroundColor: WidgetStateProperty.all(
           foregroundColor,
         ),
       ),
