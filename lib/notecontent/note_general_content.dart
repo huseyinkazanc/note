@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 class NoteGeneralContent {
-  final int id;
+  final String id;
   String messageTitle;
   String messageContent;
   Color? noteColor; // Eklenen alan

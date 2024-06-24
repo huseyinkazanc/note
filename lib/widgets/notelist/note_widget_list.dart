@@ -14,7 +14,7 @@ class NoteWidgetGridView extends StatefulWidget {
   });
 
   final List<NoteGeneralContent> messages;
-  final Map<int, Color> messageColors;
+  final Map<String, Color> messageColors; // `int` yerine `String`
   final Function(NoteGeneralContent)? onLongPress;
 
   @override
@@ -54,7 +54,7 @@ class _NoteWidgetGridViewState extends State<NoteWidgetGridView> {
     }
   }
 
-  void _onSave(int id, NoteGeneralContent editedContent, Color color) {
+  void _onSave(String id, NoteGeneralContent editedContent, Color color) {
     // Find the index of the original note in the messages list
     int index = widget.messages.indexWhere((element) => element.id == id);
 

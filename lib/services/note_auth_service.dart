@@ -10,7 +10,7 @@ class AuthService {
       final UserCredential userCredential =
           await firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
       if (userCredential.user != null) {
-        await _registerUser(email: email, username: username, password: password);
+        await _registerUser(email: email, username: username);
         return userCredential;
       }
     } on FirebaseAuthException catch (e) {
@@ -32,11 +32,10 @@ class AuthService {
     return null;
   }
 
-  Future<void> _registerUser({required String email, required String username, required String password}) async {
-    await userCollection.doc().set({
+  Future<void> _registerUser({required String email, required String username}) async {
+    await userCollection.doc(firebaseAuth.currentUser!.uid).set({
       'username': username,
       'email': email,
-      'password': password,
     });
   }
 }

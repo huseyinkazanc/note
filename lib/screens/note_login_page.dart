@@ -24,11 +24,23 @@ class _NoteLoginPageState extends State<NoteLoginPage> {
       email: emailController.text,
       password: passwordController.text,
     );
+
     if (userCredential != null && mounted) {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => NoteMainPage(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Kullanıcı adı ve parola yanlış'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
         ),
       );
     }

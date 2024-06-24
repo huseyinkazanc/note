@@ -1,10 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
+import 'package:note/services/note_firebase_service.dart';
 import 'package:note/widgets/popup/note_widget_alerttext_buton.dart';
-import 'dart:convert';
 
 class NoteMessagePage extends StatefulWidget {
   const NoteMessagePage({
@@ -12,30 +13,26 @@ class NoteMessagePage extends StatefulWidget {
     required this.onSave,
     required this.id,
     required this.notContentController,
-    required this.notTitleController, // Yeni parametre
+    required this.notTitleController,
   });
 
   final void Function(NoteGeneralContent, Color) onSave;
-  final int id;
+  final String id; // `int` yerine `String`
   final QuillController notContentController;
-
   final TextEditingController notTitleController;
-//final Color initialColor; // Yeni parametre
 
   @override
   State<NoteMessagePage> createState() => _NoteMessagePageState();
 }
 
-QuillController notContentController = QuillController.basic();
-TextEditingController notTitleController = TextEditingController();
-
 class _NoteMessagePageState extends State<NoteMessagePage> {
-  Color? _listBackgroundColor; // Renk değişkeni
+  Color? _listBackgroundColor;
+  final FirebaseService _firebaseService = FirebaseService(); // FirebaseService instance
 
   @override
   void initState() {
     super.initState();
-    _listBackgroundColor = Colors.white; // Başlangıç rengini ayarla
+    _listBackgroundColor = Colors.white;
     widget.notContentController.addListener(_preserveTextColor);
     print('NoteMessagePage initialized with document: ${widget.notContentController.document.toPlainText()}');
   }
@@ -70,7 +67,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
       widget.notContentController.formatSelection(Attribute.ul);
       final textColor =
           ThemeData.estimateBrightnessForColor(NoteColors.darkBgColor) == Brightness.light ? '#000000' : '#FFFFFF';
-      widget.notContentController.formatSelection(Attribute.fromKeyValue('color', textColor)); // Set text color
+      widget.notContentController.formatSelection(Attribute.fromKeyValue('color', textColor));
     }
   }
 
@@ -78,12 +75,16 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
     final noteContent = NoteGeneralContent(
       id: widget.id,
       messageTitle: widget.notTitleController.text,
-      messageContent: jsonEncode(widget.notContentController.document.toDelta().toJson()), // Convert to JSON string
+      messageContent: jsonEncode(widget.notContentController.document.toDelta().toJson()),
       noteColor: _listBackgroundColor,
     );
     print('Pop id: ${widget.id}');
-    widget.onSave(noteContent, _listBackgroundColor ?? Colors.white); // Return the note content and color on save
-    Navigator.of(context).pop(); // Return the note content on save
+
+    // Save note to Firebase using FirebaseService instance
+    _firebaseService.saveNote(noteContent);
+
+    widget.onSave(noteContent, _listBackgroundColor ?? Colors.white);
+    Navigator.of(context).pop();
   }
 
   @override
@@ -97,13 +98,12 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
         centerTitle: true,
         backgroundColor: NoteColors.darkBgColor,
         foregroundColor: NoteColors.whiteColor,
-        titleSpacing: 0, // Title ve actions'u daha yakın yapmak için spacing'i azaltın
+        titleSpacing: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             const Text(NoteStrings.appCreateAlrDtlTxt),
-            const SizedBox(width: 10), // Title ve dropdown arasında boşluk ekleyin
-
+            const SizedBox(width: 10),
             DropdownButton<Color>(
               icon: Icon(Icons.color_lens, color: NoteColors.whiteColor),
               underline: Container(),
@@ -120,7 +120,7 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
               onChanged: (Color? newColor) {
                 if (newColor != null) {
                   setState(() {
-                    _listBackgroundColor = newColor; // Yeni rengi ayarla
+                    _listBackgroundColor = newColor;
                   });
                 }
               },
@@ -214,7 +214,6 @@ class _NoteMessagePageState extends State<NoteMessagePage> {
                     expands: false,
                     elementOptions: const QuillEditorElementOptions(
                       unorderedList: QuillEditorUnOrderedListElementOptions(
-                        // Set the bullet color to red
                         useTextColorForDot: false,
                         customWidget: Text(
                           '•',

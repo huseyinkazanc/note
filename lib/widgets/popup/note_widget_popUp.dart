@@ -45,7 +45,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
       );
     });
   }
-
+/*
   void alertButton() {
     final noteContent = NoteGeneralContent(
       id: widget.id,
@@ -55,7 +55,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
     print('Pop id: ${widget.id}');
     widget.onSave(noteContent, widget.backgroundColor!);
     Navigator.of(context).pop();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +93,7 @@ class _NoteWidgetPopUpState extends State<NoteWidgetPopUp> {
             ),
             NoteWidgetAlertTextButton(
               onPressed: () {
-                alertButton();
+                //    alertButton();
               },
               alertBgColor: NoteColors.greenColor,
               alertTxtColor: NoteColors.whiteColor,

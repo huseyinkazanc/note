@@ -6,6 +6,7 @@ import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/screens/note_message_page.dart';
+import 'package:note/services/note_firebase_service.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
 import 'package:note/widgets/main/note_widget_show_before_delete.dart';
 import 'package:note/widgets/common/note_widget_custom_iconbutton.dart';
@@ -15,20 +16,47 @@ import 'package:note/widgets/notelist/note_widget_list.dart';
 class NoteMainPage extends StatefulWidget {
   NoteMainPage({super.key});
   final List<NoteGeneralContent> messages = [];
-  final Map<int, Color> messageColors = {};
+  final Map<String, Color> messageColors = {}; // Map keys should be String
   @override
   State<NoteMainPage> createState() => _NoteMainPageState();
 }
 
 class _NoteMainPageState extends State<NoteMainPage> {
+  final FirebaseService _firebaseService = FirebaseService(); // Initialize FirebaseService
   TextEditingController searchController = TextEditingController();
   List<NoteGeneralContent> filteredMessages = [];
-  int _listId = 0;
   Color _listBackgroundColor = Colors.white; // Default background color
 
   // Title and content controllers
   TextEditingController notTitleController = TextEditingController();
   QuillController notContentController = QuillController.basic();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotes(); // Fetch notes when the page initializes
+  }
+
+  Future<void> _fetchNotes() async {
+    try {
+      List<NoteGeneralContent> notes = await _firebaseService.fetchNotes();
+      print("Fetched notes: $notes"); // Debugging line
+      setState(() {
+        widget.messages.addAll(notes);
+        for (var note in notes) {
+          widget.messageColors[note.id] = note.noteColor ?? Colors.white;
+        }
+        filteredMessages = List.from(widget.messages);
+      });
+    } catch (e) {
+      print('Error fetching notes: $e'); // Debugging line
+    }
+  }
+
+  String _generateUniqueId() {
+    // Firestore'un benzersiz ID'sini oluştur
+    return _firebaseService.firestore.collection('notes').doc().id; // Getter kullanıldı
+  }
 
   void _alertCreateNotPressed() {
     try {
@@ -46,28 +74,22 @@ class _NoteMainPageState extends State<NoteMainPage> {
         context,
         MaterialPageRoute(
           builder: (context) => NoteMessagePage(
-            id: _listId,
+            id: _generateUniqueId(),
             onSave: _saveText,
-            notContentController: notContentController, // Pass the new controller to the dialog
-            notTitleController: notTitleController, // Pass the initial color
+            notContentController: notContentController,
+            notTitleController: notTitleController,
           ),
         ),
-      ).then((result) {
-        if (result != null) {
-          _saveText(result, _listBackgroundColor); // Pass the selected background color
-        }
-      });
+      ); // Burada .then bloğunu kaldırdık
     } catch (error) {
       print('Error occurred in _alertCreateNotPressed: $error');
-      // Optionally show a user-friendly message
     }
   }
 
   void _saveText(NoteGeneralContent noteContent, Color backgroundColor) {
     setState(() {
-      final id = _listId++;
       final noteWithId = NoteGeneralContent(
-        id: id,
+        id: noteContent.id, // Zaten oluşturulmuş ID'yi kullanıyoruz
         messageTitle: noteContent.messageTitle,
         messageContent: noteContent.messageContent,
         noteColor: backgroundColor, // Set the background color
@@ -76,40 +98,11 @@ class _NoteMainPageState extends State<NoteMainPage> {
       widget.messageColors[noteWithId.id] = backgroundColor;
       _listBackgroundColor = backgroundColor; // Set the list background color
       _filterMessages(searchController.text);
+      _firebaseService.saveNote(noteWithId); // Save the note to Firebase
     });
   }
 
-/*
-  void _alertDialogEdit(NoteGeneralContent noteContent) async {
-    notTitleController.text = noteContent.messageTitle;
-
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NoteMessagePage(
-          id: noteContent.id,
-          onSave: (editedContent, color) {
-            Navigator.pop(context, {'content': editedContent, 'color': color});
-          },
-          notContentController: QuillController(
-            document: Document.fromJson(jsonDecode(noteContent.messageContent)), // Convert the string to JSON
-            selection: const TextSelection.collapsed(offset: 0),
-          ),
-          initialColor: widget.messageColors[noteContent.id] ?? Colors.white,
-          notTitleController: notTitleController, // Pass the title controller
-        ),
-      ),
-    );
-
-    if (result != null) {
-      final editedContent = result['content'] as NoteGeneralContent;
-      final color = result['color'] as Color;
-      _onSave(noteContent.id, editedContent, color);
-    }
-  }
-  */
-
-  void _onSave(int id, NoteGeneralContent editedContent, Color color) {
+  void _onSave(String id, NoteGeneralContent editedContent, Color color) {
     setState(() {
       int index = widget.messages.indexWhere((element) => element.id == id);
       if (index != -1) {
@@ -118,8 +111,10 @@ class _NoteMainPageState extends State<NoteMainPage> {
           id: id,
           messageTitle: editedContent.messageTitle,
           messageContent: editedContent.messageContent,
+          noteColor: color,
         );
         widget.messageColors[id] = color;
+        _firebaseService.saveNote(widget.messages[index]); // Update the note in Firebase
       }
     });
   }
@@ -140,8 +135,9 @@ class _NoteMainPageState extends State<NoteMainPage> {
                       int indexToDelete = widget.messages.indexOf(noteContent);
                       if (indexToDelete != -1) {
                         widget.messages.removeAt(indexToDelete);
-                        widget.messageColors.remove(noteContent.messageTitle);
+                        widget.messageColors.remove(noteContent.id);
                         _filterMessages(searchController.text);
+                        _firebaseService.deleteNote(noteContent.id); // Delete the note from Firebase
                       }
                       Navigator.pop(context);
                     });
