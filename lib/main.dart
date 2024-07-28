@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:note/features/note_colors.dart';
 import 'package:note/screens/note_login_page.dart';
 
 void main() async {
@@ -13,14 +14,31 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter  Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        //colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        scaffoldBackgroundColor: NoteColors.darkBgColor,
+
         useMaterial3: true,
-        appBarTheme: const AppBarTheme(
-          iconTheme: IconThemeData(
+        appBarTheme: AppBarTheme(
+          backgroundColor: NoteColors.darkBgColor,
+          titleTextStyle: const TextStyle(
+            color: Colors.white, // Başlık rengini beyaz yapar
+          ),
+          iconTheme: const IconThemeData(
             color: Colors.white, // Geri tuşunu beyaz yapar
+          ),
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(
+            color: Colors.white, // Metin rengini beyaz yapar
+          ),
+          bodyMedium: TextStyle(
+            color: Colors.white, // Metin rengini beyaz yapar
+          ),
+          bodySmall: TextStyle(
+            color: Colors.white, // Metin rengini beyaz yapar
           ),
         ),
       ),

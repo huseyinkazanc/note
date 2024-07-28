@@ -10,7 +10,7 @@ class AuthService {
       final UserCredential userCredential =
           await firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
       if (userCredential.user != null) {
-        await _registerUser(email: email, username: username);
+        await registerUser(email: email, username: username);
         return userCredential;
       }
     } on FirebaseAuthException catch (e) {
@@ -32,10 +32,28 @@ class AuthService {
     return null;
   }
 
-  Future<void> _registerUser({required String email, required String username}) async {
-    await userCollection.doc(firebaseAuth.currentUser!.uid).set({
-      'username': username,
-      'email': email,
-    });
+  Future<void> registerUser({required String email, required String username}) async {
+    final user = firebaseAuth.currentUser;
+    if (user != null) {
+      await userCollection.doc(user.uid).set({
+        'username': username,
+        'email': email,
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    final user = firebaseAuth.currentUser;
+    if (user != null) {
+      final userDoc = await userCollection.doc(user.uid).get();
+      if (userDoc.exists) {
+        return userDoc.data();
+      } else {
+        print('User document does not exist at path: users/${user.uid}');
+      }
+    } else {
+      print('No authenticated user');
+    }
+    return null;
   }
 }

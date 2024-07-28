@@ -6,6 +6,7 @@ import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
 import 'package:note/notecontent/note_general_content.dart';
 import 'package:note/screens/note_message_page.dart';
+import 'package:note/screens/note_profile_page.dart';
 import 'package:note/services/note_firebase_service.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
 import 'package:note/widgets/main/note_widget_show_before_delete.dart';
@@ -182,6 +183,15 @@ class _NoteMainPageState extends State<NoteMainPage> {
     });
   }
 
+  void _noteProfilePage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NoteProfilePage(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -261,8 +271,8 @@ class _NoteMainPageState extends State<NoteMainPage> {
                     },
                   ),
                   NoteWidgetCustomIconButton(
-                    iconButton: Icons.info,
-                    onPressed: () {},
+                    iconButton: Icons.account_circle,
+                    onPressed: _noteProfilePage,
                   ),
                 ],
           backgroundColor: NoteColors.darkBgColor,

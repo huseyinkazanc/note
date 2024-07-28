@@ -25,4 +25,6 @@ class NoteStrings {
   static const String appLginWthGog = 'Continue with Google';
   static const String appLginDntAcnt = 'Don’t have an account?';
   static const String appLginSgnUp = 'Sign Up';
+  // Profile Page
+  static const String appPrflTxt = 'Profile';
 }
