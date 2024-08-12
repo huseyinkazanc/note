@@ -42,18 +42,25 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>?> getUserData() async {
+  Future<Map<String, dynamic>?> getUserDetails() async {
+    final user = firebaseAuth.currentUser;
+    print(user);
+    final doc = await userCollection.doc(user?.uid).get();
+    print(doc.data());
+    return doc.data();
+
+    return null;
+  }
+
+  Future<void> logOut() async {
+    await firebaseAuth.signOut();
+  }
+
+  Future<void> deleteUser() async {
     final user = firebaseAuth.currentUser;
     if (user != null) {
-      final userDoc = await userCollection.doc(user.uid).get();
-      if (userDoc.exists) {
-        return userDoc.data();
-      } else {
-        print('User document does not exist at path: users/${user.uid}');
-      }
-    } else {
-      print('No authenticated user');
+      await user.delete();
+      await userCollection.doc(user.uid).delete();
     }
-    return null;
   }
 }

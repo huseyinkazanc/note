@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:note/features/note_colors.dart';
 import 'package:note/features/note_font.dart';
 import 'package:note/features/note_strings.dart';
+import 'package:note/screens/note_login_page.dart';
 import 'package:note/services/note_auth_service.dart';
+import 'package:note/widgets/common/note_widget_show_before_alert.dart';
+import 'package:note/widgets/popup/note_widget_alerttext_buton.dart';
 
 class NoteProfilePage extends StatefulWidget {
   const NoteProfilePage({super.key});
@@ -25,19 +28,12 @@ class _NoteProfilePageState extends State<NoteProfilePage> {
 
   Future<void> _fetchUserData() async {
     try {
-      final userDetails = await _authService.getUserData();
-      print('Fetched user details: $userDetails'); // Debug print statement
-      if (userDetails != null) {
-        setState(() {
-          _username = userDetails['username'] ?? 'No username found';
-          _email = userDetails['email'] ?? 'No email found';
-        });
-      } else {
-        setState(() {
-          _username = 'No user data found';
-          _email = 'No user data found';
-        });
-      }
+      final userDetails = await _authService.getUserDetails();
+      setState(() {
+        _username = userDetails?['username'];
+        _email = userDetails?['email'];
+      });
+      print("User Details: $_username, $_email");
     } catch (e) {
       print('Error fetching user data: $e');
       setState(() {
@@ -49,6 +45,34 @@ class _NoteProfilePageState extends State<NoteProfilePage> {
         _isLoading = false;
       });
     }
+  }
+
+  void _logOut() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => NoteWidgetBeforeAlert(
+              onDelete: () async {
+                await _authService.logOut();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NoteLoginPage()));
+              },
+              alertTitleText: 'Log Out',
+              alertLeftText: 'Cancel',
+              alertRightText: 'Log Out',
+            ));
+  }
+
+  void _deletAccount() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => NoteWidgetBeforeAlert(
+              onDelete: () async {
+                await _authService.deleteUser();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const NoteLoginPage()));
+              },
+              alertTitleText: 'Delete Account',
+              alertLeftText: 'Cancel',
+              alertRightText: 'Delete',
+            ));
   }
 
   @override
@@ -71,15 +95,50 @@ class _NoteProfilePageState extends State<NoteProfilePage> {
         child: _isLoading
             ? const CircularProgressIndicator()
             : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Username: $_username',
-                    style: TextStyle(fontSize: NoteFont.fontSizeTwentyFour),
+                  Column(
+                    children: [
+                      Text(
+                        ' $_username',
+                        style: TextStyle(fontSize: NoteFont.fontSizeTwentyFour),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        ' $_email',
+                        style: TextStyle(fontSize: NoteFont.fontSizeTwentyFour),
+                      ),
+                    ],
                   ),
-                  Text(
-                    'Email: $_email',
-                    style: TextStyle(fontSize: NoteFont.fontSizeTwentyFour),
+                  const Spacer(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: NoteWidgetAlertTextButton(
+                            onPressed: _deletAccount,
+                            alertBgColor: NoteColors.redColor,
+                            alertTxtColor: NoteColors.whiteColor,
+                            alertText: NoteStrings.appPrfDlt,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: NoteWidgetAlertTextButton(
+                            onPressed: _logOut,
+                            alertBgColor: NoteColors.whiteColor,
+                            alertTxtColor: NoteColors.darkBgColor,
+                            alertText: NoteStrings.appPrfLgot,
+                            alertBrdrColor: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

@@ -27,4 +27,6 @@ class NoteStrings {
   static const String appLginSgnUp = 'Sign Up';
   // Profile Page
   static const String appPrflTxt = 'Profile';
+  static const String appPrfLgot = 'Log Out';
+  static const String appPrfDlt = 'Delete Account';
 }

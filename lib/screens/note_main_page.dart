@@ -9,7 +9,7 @@ import 'package:note/screens/note_message_page.dart';
 import 'package:note/screens/note_profile_page.dart';
 import 'package:note/services/note_firebase_service.dart';
 import 'package:note/widgets/main/note_widget_floataction.dart';
-import 'package:note/widgets/main/note_widget_show_before_delete.dart';
+import 'package:note/widgets/common/note_widget_show_before_alert.dart';
 import 'package:note/widgets/common/note_widget_custom_iconbutton.dart';
 import 'package:note/widgets/main/note_widget_showModelBottomSheet.dart';
 import 'package:note/widgets/notelist/note_widget_list.dart';
@@ -130,7 +130,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return NoteWidgetBeforeDelete(
+                return NoteWidgetBeforeAlert(
                   onDelete: () {
                     setState(() {
                       int indexToDelete = widget.messages.indexOf(noteContent);
@@ -143,6 +143,9 @@ class _NoteMainPageState extends State<NoteMainPage> {
                       Navigator.pop(context);
                     });
                   },
+                  alertTitleText: 'Delete Note',
+                  alertLeftText: 'Cancel',
+                  alertRightText: 'Delete',
                 );
               },
             );

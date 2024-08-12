@@ -7,12 +7,14 @@ class NoteWidgetAlertTextButton extends StatelessWidget {
     required this.alertBgColor,
     required this.alertTxtColor,
     required this.alertText,
+    this.alertBrdrColor,
   });
 
   final String alertText;
   final Color alertBgColor;
   final Color alertTxtColor;
   final VoidCallback onPressed;
+  final Color? alertBrdrColor;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,10 @@ class NoteWidgetAlertTextButton extends StatelessWidget {
         shape: WidgetStateProperty.all(
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
+            side: BorderSide(
+              color: alertBrdrColor ?? Colors.transparent,
+              width: 2,
+            ),
           ),
         ),
         fixedSize: WidgetStateProperty.all(
