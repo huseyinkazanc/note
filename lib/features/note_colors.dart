@@ -8,6 +8,7 @@ class NoteColors {
   static Color greyColor = Colors.grey;
   static Color greenColor = Colors.green;
   static Color redColor = Colors.red;
+  static Color amberColor = Colors.amber;
   static Color randomColor() {
     return Colors.primaries[Random().nextInt(Colors.primaries.length)];
   }

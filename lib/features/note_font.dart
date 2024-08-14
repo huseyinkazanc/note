@@ -7,5 +7,6 @@ class NoteFont {
   static double fontSizeTwentyFour = 24;
   static double fontSizeThirty = 30;
   static double fontSizeThirtySix = 36;
+  static double fontSizeFifty = 50;
   static FontWeight fontWeightBold = FontWeight.bold;
 }

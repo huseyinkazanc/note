@@ -29,4 +29,5 @@ class NoteStrings {
   static const String appPrflTxt = 'Profile';
   static const String appPrfLgot = 'Log Out';
   static const String appPrfDlt = 'Delete Account';
+  static const String appPrfDrkMd = 'Dark Mode';
 }

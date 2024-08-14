@@ -190,7 +190,7 @@ class _NoteMainPageState extends State<NoteMainPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const NoteProfilePage(),
+        builder: (context) => NoteProfilePage(),
       ),
     );
   }
